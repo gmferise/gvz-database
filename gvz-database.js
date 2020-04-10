@@ -4,7 +4,7 @@ var GVZ = (function() {
 	/// LIBRARY VARIABLES
 	var methods = {};
 	var internal = {};
-	var databases = {};
+	var databases = [];
 	var logging = true;
 	var GoogleAuth;
 	
@@ -12,16 +12,20 @@ var GVZ = (function() {
 	var authStatusListener = function(){};
 	
 	/* var databases = 
-	(DatabaseDictionary){
-		"SHEET ID" : (SheetDictionary){
-			name: "SHEET NAME",
-			pages: (PageDictionary){
-				"PAGE ID":"PAGE NAME",
+	(Array)[
+		(DatabaseObject){
+			"name": "SHEET NAME",
+			"id": "SHEET ID",
+			"pages": (Array)[
+				(PageObject){
+					"name": "PAGE NAME",
+					"id": "PAGE ID"
+				},
 				...
-			},
+			]
 		},
-		...	
-	}
+		...
+	]
 	*/
 
 	/// MAIN QUERY FUNCTION
@@ -43,7 +47,7 @@ var GVZ = (function() {
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.loadDatabases = function(){
-		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and name contains '[OsDB]' and trashed = false";
+		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
 		gapi.client.drive.files.list({
 			q: params,
 		}).then(function(response) {
@@ -63,7 +67,11 @@ var GVZ = (function() {
 			for (let i = 0; i < response.result.sheets.length; i++){
 				pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
 			}
-			databases[id] = { "name":response.result.properties.title, "pages":pages };
+			databases.push({
+				"name":response.result.properties.title,
+				"id":id,
+				"pages": pages
+			});
 		});
 	};
 	
