@@ -103,7 +103,7 @@ function authChanged(newStatus){
 GVZ.setAuthListener(authChanged);
 ```
 
-### Database Objects
+### Loading and Using Databases
 The GVZ library turns any spreadsheet into a database object which you can use to make queries and display information about the database to the user.
 It contains the name of the database, it's spreadsheet ID, and an array of page objects.
 Each page object contains the page name and it's page ID.
@@ -126,20 +126,6 @@ GVZ.getDatabases();
     ]
 ```
 
-**Example:**
-```javascript
-// Print out the entire table on the first page of the first database
-let database = GVZ.getDatabases()[0];
-GVZ.query(`
-    USING ${database.id}
-    FROM ${database.pages[0].id} SELECT *
-`).then(function(response){
-    console.log(response);
-});
-
-```
-
-### Loading Databases
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
 It will return a promise that will contain an array of database objects. At any point you can get the latest copy of this array using `GVZ.getDatabases()`.
 You can also get the information of a singular database using `getDatabase(id)` so you don't have to search the array yourself.
@@ -163,8 +149,5 @@ for (let i = 0; i < databases.length; i++){
     dropdown.appendChild(item);
 }
 ```
-
-### Selecting a Database
-Nothing yet...
 
 ### Querying Databases
