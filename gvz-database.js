@@ -48,7 +48,7 @@ var GVZ = (function() {
 			for (let i = 0; i < dbs.length; i++){
 				GVZ.log(dbs[i]);
 			}
-		}
+		});
 	};
 	
 	/// LOADS THE GOOGLEAUTH VARIABLE
