@@ -169,6 +169,7 @@ var GVZ = (function() {
 				for (let i = 0; i < databases.length; i++){
 					if (databases[i].id == id){
 						databases.splice(i,1);
+						i--;
 					}
 				}
 				// add the new version
@@ -223,10 +224,13 @@ var GVZ = (function() {
 		checkReqs(true);
 		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
 		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
-		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined
-		if (p == "") { p = unparsed.shift(0).toUpperCase(); } // remove any leading "" caused by leading whitespace
+		// remove any "" caused by leading/trailing whitespace
+		for (let i = 0; i < unparsed.length; i++){
+			if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
+		}	
 		
 		// First word should be USING
+		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined
 		if (p != 'USING') { methods.err('Unexpected token "'+p+'" (expected USING)'); }
 		
 		// Second word should be the database id
