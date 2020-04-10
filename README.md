@@ -20,7 +20,7 @@ Logging is disabled by default since it's intended for debugging. You can enable
 
 You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
 
-You can also use `GVZ.err(string)` within your own code to throw a GVZ Error. These errors cannot be turned off like the logging can.
+You can also use `GVZ.err(string)` within your own code to throw a GVZ Error if you'd like, although they cannot be disabled.
 
 
 **Example:**
