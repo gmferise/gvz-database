@@ -12,7 +12,7 @@ You will also need the `/auth/drive.metadata.readonly`, `/auth/spreadsheets`, an
 
 You should also have:
 * A Client ID with it's JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
-* An API Key that is (preferrably) restricted to the Sheets and Drive APIs and your website. (Mine is `https://gmferise.github.io/*` for this one)
+* An API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
 
 
 ### GVZ Console Logging
@@ -91,5 +91,3 @@ function authChanged(newStatus){
 }
 GVZ.setAuthListener(authChanged);
 ```
-
-

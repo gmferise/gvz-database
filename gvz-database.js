@@ -3,6 +3,7 @@ var GVZ = (function() {
 	
 	/// LIBRARY VARIABLES
 	var methods = {};
+	var internal = {};
 	var databases = {};
 	var logging = true;
 	var GoogleAuth;
@@ -10,14 +11,16 @@ var GVZ = (function() {
 	/// USER VARIABLES
 	var authStatusListener = function(){};
 	
-	/* DATABASES FORMAT: {
-	"SHEET ID" : [
-		"SHEET NAME",{
-			"PAGE ID":"PAGE NAME",
-			...
-		}
-	],
-	...	
+	/* var databases = 
+	(DatabaseDictionary){
+		"SHEET ID" : (SheetDictionary){
+			name: "SHEET NAME",
+			pages: (PageDictionary){
+				"PAGE ID":"PAGE NAME",
+				...
+			},
+		},
+		...	
 	}
 	*/
 
@@ -46,8 +49,21 @@ var GVZ = (function() {
 		}).then(function(response) {
 			let dbs = response.result.files;
 			for (let i = 0; i < dbs.length; i++){
-				GVZ.log(dbs[i]);
+				methods.reloadDatabase(dbs[i].id);
 			}
+		});
+	};
+	
+	/// RELOADS ALL INFO ON A DATABASE INTO databases
+	methods.reloadDatabase = function(id){
+		gapi.client.sheets.spreadsheets.get({
+			spreadsheetId: id
+		}).then(function(response){
+			let pages = {};
+			for (let i = 0; i < response.result.sheets.length; i++){
+				pages[response.result.sheets[i].sheetId] = response.result.sheets[i].title;
+			}
+			databases[id] = { "name":response.result.properties.title, "pages":pages };
 		});
 	};
 	
