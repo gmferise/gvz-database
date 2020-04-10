@@ -40,11 +40,19 @@ var GVZ = (function() {
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.loadDatabases = function(){
-		
+		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and name contains '[OsDB]' and trashed = false";
+		gapi.client.drive.files.list({
+			q: params,
+		}).then(function(response) {
+			let dbs = response.result.files;
+			for (let i = 0; i < dbs.length; i++){
+				GVZ.log(dbs[i]);
+			}
+		}
 	};
 	
 	/// LOADS THE GOOGLEAUTH VARIABLE
-	methods.initialize = function(keepAuth){
+	methods.initialize = function(apiKey,clientId,keepAuth){
 		// Check if gapi can be used
 		keepAuth = (keepAuth === true);
 		if (typeof(gapi) === undefined){ throw 'GVZ Error: gapi is undefined. Did the API load properly?'; }
@@ -52,9 +60,9 @@ var GVZ = (function() {
 		gapi.load('client:auth2', function(){
 			// Then initialize its client
 			gapi.client.init({ // Initialize a client with these properties
-				"apiKey":"AIzaSyDIptkXtN8vcrOr5LPBvk21WuAk8UmVwAs",
+				"apiKey":apiKey,
 				"discoveryDocs":["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest","https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"],
-				"clientId":"1031491199015-pbjmtfn9kj0tvcl24k7vntelua6glb90.apps.googleusercontent.com",
+				"clientId":clientId,
 				"scope":"https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets"
 			}).then(function(){
 				// Then assign GoogleAuth and call the user's listener

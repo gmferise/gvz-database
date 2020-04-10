@@ -20,7 +20,12 @@ GVZ.log("This will not print to the console.");
 ### Initializing the Library
 The GVZ library relies on multiple libraries and APIs.
 This is the recommended way of loading them, although other configurations may work as well.
-You must load all the libraries and call GVZ.initialize() for every html page in your app.
+You must load all the libraries and call `GVZ.initialize()` for every html page in your app.
+
+`GVZ.initialize()` takes three parameters: your API key, your Client ID, and a boolean.
+The boolean determines whether the library will attempt to automatically reauthenticate the user.
+Setting it to true is useful if you have a user sign in on one html page then redirect them to another.
+The default value is false.
 
 **Example:** 
 ```html
@@ -29,9 +34,16 @@ You must load all the libraries and call GVZ.initialize() for every html page in
 <script> google.charts.load('current'); </script>
 <script src="gvz-database.js"></script>
 <script async defer src="https://apis.google.com/js/api.js" 
-    onload="this.onload=GVZ.initialize(true);"
+    onload="this.onload=loadGVZ();"
     onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
+```
+```javascript
+function loadGVZ(){
+	let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
+	let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
+	GVZ.initialize(apiKey,clientId,true);
+}
 ```
 
 ### Handling Auth Status
