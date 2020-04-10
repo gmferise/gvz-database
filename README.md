@@ -7,8 +7,8 @@ It essentially extends the functionality of the google.visualizations.Query() AP
 ### GVZ Console Logging
 The GVZ library comes with it's own logging feature.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when `GVZ.logging` is true.
-You can use `GVZ.log()` within your code to take advantage of the same function, and easily disable your own log statements related to the library.
-It can be enabled or disabled by changing the boolean value directly of `GVZ.logging`, and the default value is true.
+You can use `GVZ.log()` within your code to take advantage of the same functionality, and easily disable your own log statements related to the library.
+Logging can be enabled or disabled by changing the boolean value directly of `GVZ.logging`, and the default value is true.
 
 **Example:**
 ```javascript
@@ -29,6 +29,8 @@ The default value is false.
 
 **Example:** 
 ```html
+<!-- FRONTEND -->
+<head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script> google.charts.load('current'); </script>
@@ -37,12 +39,14 @@ The default value is false.
     onload="this.onload=loadGVZ();"
     onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
+</head>
 ```
 ```javascript
+/// BACKEND
 function loadGVZ(){
-	let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
-	let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
-	GVZ.initialize(apiKey,clientId,true);
+    let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
+    let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
+    GVZ.initialize(apiKey,clientId,true);
 }
 ```
 
