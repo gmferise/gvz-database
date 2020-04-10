@@ -17,13 +17,13 @@ You will also need to:
 The GVZ library comes with it's own logging feature.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when `GVZ.logging` is true.
 You can use `GVZ.log()` within your code to take advantage of the same functionality, and easily disable your own log statements related to the library.
-Logging can be enabled or disabled by changing the boolean value directly of `GVZ.logging`. The default value is true.
+Logging can be enabled or disabled by changing the boolean value directly of `GVZ.logging`. The default value is false.
 
 **Example:**
 ```javascript
-GVZ.log("This will print to the console.");
-GVZ.logging = false;
 GVZ.log("This will not print to the console.");
+GVZ.logging = true;
+GVZ.log("This will print to the console.");
 ```
 
 ### Initializing the Library

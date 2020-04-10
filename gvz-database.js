@@ -5,7 +5,7 @@ var GVZ = (function() {
 	var methods = {};
 	var internal = {};
 	var databases = [];
-	var logging = true;
+	var logging = false;
 	var GoogleAuth;
 	
 	/// USER VARIABLES
