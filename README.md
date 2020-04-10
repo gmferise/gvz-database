@@ -127,7 +127,8 @@ GVZ.getDatabases();
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
-It will return a promise that will contain an array of database objects. At any point you can get the latest copy of this array using `GVZ.getDatabases()`.
+It will return a promise that will contain an array of database objects once completed.
+At any point you can get the latest copy of this array using `GVZ.getDatabases()`, which *is not* asynchronous..
 You can also get the information of a singular database using `getDatabase(id)` so you don't have to search the array yourself.
 
 If you believe a specific database object is no longer accurate, you can call `GVZ.reloadDatabase(id)` and it will return a promise with the up-to-date database object as well as updating the array returned by `GVZ.getDatabases()` to match.
@@ -136,18 +137,32 @@ To limit the databases the user can choose from, you can set a database flair us
 When a flair is set, any databases created with the library will be given the name `[FLAIR] My Database` and `GVZ.reloadDatabases()` will only load databases with `[FLAIR]` in their name.
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
 
+**Function Usage**
+```javascript
+// Both pairs of functions will return the same thing.
+// The reload functions are asynchronous and return the up-to-date versions in a promise
+// The get functions are instant and return the last known values
+GVZ.reloadDatabases().then(function(databases){ console.log(databases); }
+console.log(GVZ.getDatabases());
+
+GVZ.reloadDatabase(id).then(function(database){ console.log(database); }
+console.log(GVZ.getDatabase(id));
+```
+
 **Example:**
 ```javascript
 // Populate a dropdown to let user pick a database
 GVZ.setFlair("gvzDB");
-let databases = GVZ.reloadDatabases();
-let dropdown = document.getElementById('db-list');
-for (let i = 0; i < databases.length; i++){
-    let item = document.createElement('p');
-    item.innerText = databases[i].name;
-    item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
-    dropdown.appendChild(item);
-}
+GVZ.reloadDatabases().then(function(databases){
+    let database = databases[0];
+    let dropdown = document.getElementById('db-list');
+    for (let i = 0; i < databases.length; i++){
+        let item = document.createElement('p');
+        item.innerText = databases[i].name;
+        item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
+        dropdown.appendChild(item);
+    }
+});
 ```
 
 ### Querying Databases
