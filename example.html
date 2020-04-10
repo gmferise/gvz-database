@@ -9,10 +9,8 @@
 		<script> google.charts.load('current'); </script>
 		<!-- Append the GVZ library before the Google JavaScript API -->
 		<script src="gvz-database.js"></script>
-		<!-- When the Google JavaScript API loads we tell the GVZ library to initialize.
-		The single parameter of true/false determines whether to automatically sign in the user
-		if their cookies have a session already. This is useful to set to true if your app has multiple
-		html pages. You can set it to false on the sign-in page and true elsewhere. The value will default to false.-->
+		<!-- When the Google JavaScript API loads we tell the GVZ library to initialize
+		and sign the user in if their session is still active-->
 		<script async defer src="https://apis.google.com/js/api.js" 
 			onload="this.onload=GVZ.initialize(true);"
 			onreadystatechange="if (this.readyState === 'complete') this.onload()">
@@ -33,7 +31,7 @@
 					b.innerHTML = "Sign In";
 				}
 			}
-			GVZ.setAuthListener(authChanged); // Tell the GVZ library to use it
+			GVZ.setAuthListener(authChanged); // Tell the GVZ library to use the listener function
 		</script>
 	</head>
 	
