@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Example Implementation</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<script src="https://www.gstatic.com/charts/loader.js"></script>
+		<script>
+			google.charts.load('current');
+		</script>
+		<script src="gvz-database.js"></script>
+		<script>
+			function authChanged(){
+				console.log(GVZ.getAuthStatus());
+			}
+			GVZ.setAuthListener(authChanged);
+		</script>
+		<script async defer src="https://apis.google.com/js/api.js" 
+			onload="this.onload=GVZ.loadAuth(true);" <!-- true keeps user from having to press 'sign in' button again -->
+			onreadystatechange="if (this.readyState === 'complete') this.onload()">
+		</script>
+	</head>
+	<body>
+	<button onclick="GVZ.toggleAuth()">Sign In</button>
+	</body>
+</html>
+
+<script>
+
+</script>
