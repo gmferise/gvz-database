@@ -103,6 +103,9 @@ function authChanged(newStatus){
 GVZ.setAuthListener(authChanged);
 ```
 
+### Creating Databases
+Nothing yet...
+
 ### Loading and Using Databases
 The GVZ library turns any spreadsheet into a database object which you can use to make queries and display information about the database to the user.
 It contains the name of the database, it's spreadsheet ID, and an array of page objects.
@@ -127,21 +130,22 @@ GVZ.getDatabases();
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
-It will return a promise that will contain an array of database objects once completed.
-At any point you can get the latest copy of this array using `GVZ.getDatabases()`, which *is not* asynchronous..
-You can also get the information of a singular database using `getDatabase(id)` so you don't have to search the array yourself.
-
-If you believe a specific database object is no longer accurate, you can call `GVZ.reloadDatabase(id)` and it will return a promise with the up-to-date database object as well as updating the array returned by `GVZ.getDatabases()` to match.
+At any point you can get the last copy of this array using `GVZ.getDatabases()`.
+You can also get the information of a singular database using `getDatabase(id)`.
+You can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
 
 To limit the databases the user can choose from, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`.
 When a flair is set, any databases created with the library will be given the name `[FLAIR] My Database` and `GVZ.reloadDatabases()` will only load databases with `[FLAIR]` in their name.
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
 
+To 'select' a database for use you just need to keep its ID to use when querying. For pages the same is true, however it is recommended that you keep track of their index instead and just do `database.pages[i].id` when the id is needed.
+
 **Function Usage**
 ```javascript
-// Both pairs of functions will return the same thing.
+// Both pairs of functions will print the same thing.
 // The reload functions are asynchronous and return the up-to-date versions in a promise
 // The get functions are instant and return the last known values
+
 GVZ.reloadDatabases().then(function(databases){ console.log(databases); });
 console.log(GVZ.getDatabases());
 
