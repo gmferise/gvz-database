@@ -6,13 +6,11 @@ It essentially extends the functionality of the google.visualizations.Query() AP
 
 ### Google Developer Console Config
 Before you can use this library, you should make a [Google API Project](https://console.developers.google.com/).
-Make sure you have enabled the [Google Drive API](https://console.developers.google.com/apis/library/drive.googleapis.com?id=e44a1596-da14-427c-9b36-5eb6acce3775)
-and the [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com?id=739c20c5-5641-41e8-a938-e55ddc082ad1) for your project.
-You will also need the `/auth/drive.metadata.readonly`, `/auth/spreadsheets`, and `/auth/drive.file` scopes to be enabled for your project.
-
-You should also have:
-* A Client ID with it's JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
-* An API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
+You will also need to:
+* Enable the [Google Drive API](https://console.developers.google.com/apis/library/drive.googleapis.com?id=e44a1596-da14-427c-9b36-5eb6acce3775) and [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com?id=739c20c5-5641-41e8-a938-e55ddc082ad1) for your project in the API Library.
+* Enable the `/auth/drive.metadata.readonly`, `/auth/spreadsheets`, and `/auth/drive.file` scopes in your OAuth Consent Screen.
+* Make a Client ID with its JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
+* Make an API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
 
 
 ### GVZ Console Logging
@@ -91,3 +89,10 @@ function authChanged(newStatus){
 }
 GVZ.setAuthListener(authChanged);
 ```
+
+### Database Management
+Nothing yet...
+
+### Selecting a Database
+Nothing yet...
+
