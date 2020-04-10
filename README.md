@@ -4,6 +4,17 @@ It essentially extends the functionality of the google.visualizations.Query() AP
 
 ## Documentation
 
+### Google Developer Console Config
+Before you can use this library, you should make a [Google API Project](https://console.developers.google.com/).
+Make sure you have enabled the [Google Drive API](https://console.developers.google.com/apis/library/drive.googleapis.com?id=e44a1596-da14-427c-9b36-5eb6acce3775)
+and the [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com?id=739c20c5-5641-41e8-a938-e55ddc082ad1) for your project.
+You will also need the `/auth/drive.metadata.readonly`, `/auth/spreadsheets`, and `/auth/drive.file` scopes to be enabled for your project.
+
+You should also have:
+* A Client ID with it's JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
+* An API Key that is (preferrably) restricted to the Sheets and Drive APIs and your website. (Mine is `https://gmferise.github.io/*` for this one)
+
+
 ### GVZ Console Logging
 The GVZ library comes with it's own logging feature.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when `GVZ.logging` is true.
