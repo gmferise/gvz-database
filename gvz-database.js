@@ -39,12 +39,12 @@ var GVZ = (function() {
 	};
 	
 	/// SET LOGGING
-	methods.setLogging(bool){
+	methods.setLogging = function(bool){
 		logging = bool;
 	};
 	
 	/// TOGGLE LOGGING
-	methods.toggleLogging(bool){
+	methods.toggleLogging = function(bool){
 		logging = (!logging);
 	};
 	
