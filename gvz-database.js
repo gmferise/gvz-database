@@ -38,7 +38,15 @@ var GVZ = (function() {
 		if (logging){ console.log(string); }
 	};
 	
-	// LIBRARY ERRORS
+	methods.setLogging(bool){
+		logging = bool;
+	}
+	
+	methods.toggleLogging(bool){
+		logging = (!logging);
+	}
+	
+	/// LIBRARY ERRORS
 	methods.err = function(string){
 		throw 'GVZ Error: '+string;
 	};
