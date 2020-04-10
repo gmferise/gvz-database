@@ -4,6 +4,7 @@ var GVZ = (function() {
 	/// LIBRARY VARIABLES
 	var methods = {};
 	var databases = {};
+	var logging = true;
 	var GoogleAuth;
 	
 	/// USER VARIABLES
@@ -34,7 +35,7 @@ var GVZ = (function() {
 	};
 	
 	methods.log = function(string){
-		console.log(string);
+		if (logging){ console.log(string); }
 	};
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
@@ -43,7 +44,7 @@ var GVZ = (function() {
 	};
 	
 	/// LOADS THE GOOGLEAUTH VARIABLE
-	methods.loadAuth = function(keepAuth){
+	methods.initialize = function(keepAuth){
 		// Check if gapi can be used
 		keepAuth = (keepAuth === true);
 		if (typeof(gapi) === undefined){ throw 'GVZ Error: gapi is undefined. Did the API load properly?'; }

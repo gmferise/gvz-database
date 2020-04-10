@@ -2,25 +2,44 @@
 <html lang="en">
 	<head>
 		<title>Example Implementation</title>
+		<!-- First, load in the necessary Google libraries and APIs -->
+		
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="https://www.gstatic.com/charts/loader.js"></script>
-		<script>
-			google.charts.load('current');
-		</script>
+		<script> google.charts.load('current'); </script>
+		<!-- Append the GVZ library before the Google JavaScript API -->
 		<script src="gvz-database.js"></script>
-		<script>
-			function authChanged(){
-				console.log(GVZ.getAuthStatus());
-			}
-			GVZ.setAuthListener(authChanged);
-		</script>
+		<!-- When the Google JavaScript API loads we tell the GVZ library to initialize.
+		The single parameter of true/false determines whether to automatically sign in the user
+		if their cookies have a session already. This is useful to set to true if your app has multiple
+		html pages. You can set it to false on the sign-in page and true elsewhere. The value will default to false.-->
 		<script async defer src="https://apis.google.com/js/api.js" 
-			onload="this.onload=GVZ.loadAuth(true);" <!-- true keeps user from having to press 'sign in' button again -->
+			onload="this.onload=GVZ.initialize(true);"
 			onreadystatechange="if (this.readyState === 'complete') this.onload()">
 		</script>
+		
+		<!-- Create a listener for whenever the user's auth status changes. -->
+		<script>
+			function authChanged(newStatus){
+				// Log the new auth status
+				GVZ.log("Auth status changed: "+newStatus);
+				
+				// Update button text
+				let b = document.getElementById('auth-button');
+				if (newStatus){
+					b.innerHTML = "Sign Out";
+				}
+				else {
+					b.innerHTML = "Sign In";
+				}
+			}
+			GVZ.setAuthListener(authChanged); // Tell the GVZ library to use it
+		</script>
 	</head>
+	
 	<body>
-	<button onclick="GVZ.toggleAuth()">Sign In</button>
+	<!-- Make the button we told the listener to change the text on -->
+	<button id="auth-button" onclick="GVZ.toggleAuth()">Sign In</button>
 	</body>
 </html>
 
