@@ -33,8 +33,9 @@ You must load all the libraries and call `GVZ.initialize()` for every html page 
 
 `GVZ.initialize()` takes three parameters: your API key, your Client ID, and a boolean.
 The boolean determines whether the library will attempt to automatically reauthenticate the user.
-Setting it to true is useful if you have a user sign in on one html page then redirect them to another.
-The default value is false.
+The intended use is to make it false for a page dedicated to signing in so the user can choose which account to use,
+then when you redirect them to the main page you can re-initialize the GVZ library and sign them back in.
+The default value is true.
 
 **Example:** 
 ```html

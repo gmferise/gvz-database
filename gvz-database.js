@@ -50,7 +50,7 @@ var GVZ = (function() {
 	/// LOADS THE GOOGLEAUTH VARIABLE
 	methods.initialize = function(apiKey,clientId,keepAuth){
 		// Check if gapi can be used
-		keepAuth = (keepAuth === true);
+		keepAuth = (keepAuth === false);
 		if (typeof(gapi) === undefined){ methods.err('gapi is undefined. Did the API load properly?'); }
 		// Call gapi load function
 		gapi.load('client:auth2', function(){
