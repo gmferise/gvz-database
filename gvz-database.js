@@ -6,6 +6,10 @@ var GVZ = (function() {
 	var internal = {};
 	var databases = [];
 	var logging = false;
+	var checkReqs = function(){
+		if (typeof(gapi) === undefined){ methods.err('gapi is undefined. Did the API load properly?'); }
+		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+	};
 	var GoogleAuth;
 	
 	/// USER VARIABLES
@@ -51,16 +55,15 @@ var GVZ = (function() {
 	methods.err = function(string){
 		throw 'GVZ Error: '+string;
 	};
-	
+		
 	/// ****************
 	/// * AUTH METHODS *
 	/// ****************
 	
 	/// LOADS THE GOOGLEAUTH VARIABLE
 	methods.initialize = function(apiKey,clientId,keepAuth){
-		// Check if gapi can be used
+		checkReqs();
 		keepAuth = (keepAuth === false);
-		if (typeof(gapi) === undefined){ methods.err('gapi is undefined. Did the API load properly?'); }
 		// Call gapi load function
 		gapi.load('client:auth2', function(){
 			// Then initialize its client
@@ -82,31 +85,35 @@ var GVZ = (function() {
 	
 	/// TOGGLES AUTH STATUS AND TRIGGERS DIALOGUE OR SIGNS OUT
 	methods.toggleAuth = function(){
-		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+		checkReqs();
 		if (GoogleAuth.isSignedIn.get()) { GoogleAuth.signOut(); }
 		else { GoogleAuth.signIn(); }
 	}
 	
 	/// GETS CURRENT AUTH STATUS
 	methods.getAuthStatus = function(){
-		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+		checkReqs();
 		return GoogleAuth.isSignedIn.get();
 	};
 	
 	/// SIGNS IN 
 	methods.signIn = function(){
+		checkReqs();
 		GoogleAuth.signIn();
 	}
 	
 	/// SIGNS OUT
 	methods.signOut = function(){
+		checkReqs();
 		GoogleAuth.signOut();
 	}
 	
 	/// SETS THE LISTENER FOR CHANGE IN AUTH STATUS
 	methods.setAuthListener = function(callback){
-		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
-		authStatusListener = function(){ callback(GoogleAuth.isSignedIn.get()); };
+		authStatusListener = function(){
+			checkReqs();
+			callback(GoogleAuth.isSignedIn.get());
+		};
 	};
 	
 	/// CLEARS THE LISTENER FOR CHANGE IN AUTH STATUS
@@ -120,6 +127,7 @@ var GVZ = (function() {
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.loadDatabases = function(){
+		checkReqs();
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
 			gapi.client.drive.files.list({
@@ -140,6 +148,7 @@ var GVZ = (function() {
 	
 	/// RELOADS ALL INFO ON A DATABASE
 	methods.reloadDatabase = function(id){
+		checkReqs();
 		return new Promise(function(resolve,reject){
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
@@ -182,6 +191,7 @@ var GVZ = (function() {
 	
 	/// MAIN QUERY FUNCTION
 	methods.query = function(string){
+		checkReqs();
 		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.loadDatabases()'); }
 		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
 		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined

@@ -17,7 +17,11 @@ You will also need to:
 The GVZ library comes with it's own logging feature.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
 Logging is disabled by default since it's intended for debugging. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
-You can also use `GVZ.log()` within your code to take advantage of the same debugging functionality.
+
+You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
+
+You can also use `GVZ.err(string)` within your own code to throw a GVZ Error. These errors cannot be turned off like the logging can.
+
 
 **Example:**
 ```javascript
