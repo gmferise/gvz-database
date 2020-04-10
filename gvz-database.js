@@ -10,7 +10,6 @@ var GVZ = (function() {
 	
 	/// USER VARIABLES
 	var authStatusListener = function(newStatus){};
-	var databasesListener = function(){};
 	
 	/* var databases = 
 	(Array)[
@@ -121,33 +120,52 @@ var GVZ = (function() {
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.loadDatabases = function(){
-		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
-		gapi.client.drive.files.list({
-			q: params,
-		}).then(function(response) {
-			let dbs = response.result.files;
-			for (let i = 0; i < dbs.length; i++){
-				methods.reloadDatabase(dbs[i].id);
-			}
+		return new Promise(function(resolve,reject){
+			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
+			gapi.client.drive.files.list({
+				q: params,
+			}).then(function(response) {
+				let newDatabases = response.result.files;
+				databases = [];
+				let successes = 0;
+				for (let i = 0; i < newDatabases.length; i++){
+					methods.reloadDatabase(newDatabases[i].id).then(function(response){
+						successes++;
+						if (successes >= newDatabases.length){ resolve(databases); }
+					});
+				}
+			});
 		});
 	};
 	
 	/// RELOADS ALL INFO ON A DATABASE
 	methods.reloadDatabase = function(id){
-		gapi.client.sheets.spreadsheets.get({
-			spreadsheetId: id
-		}).then(function(response){
-			let pages = {};
-			for (let i = 0; i < response.result.sheets.length; i++){
-				pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
-			}
-			databases.push({
-				"name":response.result.properties.title,
-				"id":id,
-				"pages": pages
+		return new Promise(function(resolve,reject){
+			gapi.client.sheets.spreadsheets.get({
+				spreadsheetId: id
+			}).then(function(response){
+				let pages = {};
+				for (let i = 0; i < response.result.sheets.length; i++){
+					pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
+				}
+				let database = {
+					"name":response.result.properties.title,
+					"id":id,
+					"pages": pages
+				};
+				// remove any old instances of the database
+				for (let i = 0; i < databases.length; i++){
+					if (databases[i].id == id){
+						databases.splice(i,1);
+					}
+				}
+				// add the new version
+				databases.push(database);
+				resolve(database);
 			});
 		});
 	};
+	
 	
 	/// RETURNS DICTIONARY OF ALL DATABASE IDS AND NAMES
 	methods.getDatabases = function(){
