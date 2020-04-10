@@ -58,7 +58,7 @@ var GVZ = (function() {
 			}).then(function(){
 				// Then assign GoogleAuth and call the user's listener
 				GoogleAuth = gapi.auth2.getAuthInstance();
-				GoogleAuth.isSignedIn.listen(authChangeListener);
+				GoogleAuth.isSignedIn.listen(authStatusListener);
 				// Sign out unless told to do otherwise
 				if (!keepAuth){ GoogleAuth.signOut(); }
 				else { authStatusListener(); }
