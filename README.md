@@ -29,8 +29,8 @@ You must load all the libraries and call GVZ.initialize() for every html page in
 <script> google.charts.load('current'); </script>
 <script src="gvz-database.js"></script>
 <script async defer src="https://apis.google.com/js/api.js" 
-	onload="this.onload=GVZ.initialize(true);"
-	onreadystatechange="if (this.readyState === 'complete') this.onload()">
+    onload="this.onload=GVZ.initialize(true);"
+    onreadystatechange="if (this.readyState === 'complete') this.onload()">
 </script>
 ```
 
@@ -59,8 +59,8 @@ Your listener function should take one boolean parameter which will be the user'
 **Example:**
 ```javascript
 function authChanged(newStatus){
-	console.log("The user's auth status is now "+newStatus);
-	// TODO: Update some UI stuff
+    console.log("The user's auth status is now "+newStatus);
+    // TODO: Update some UI stuff
 }
 GVZ.setAuthListener(authChanged);
 ```
