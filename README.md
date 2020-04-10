@@ -41,7 +41,8 @@ The GVZ library relies on multiple libraries and APIs.
 This is the recommended way of loading them, although other configurations may work as well.
 You must load all the libraries and call `GVZ.initialize()` for every html page in your app.
 
-`GVZ.initialize()` takes three parameters: your API key, your Client ID, and a boolean.
+The function call should take the form of `GVZ.initialize(apiKey,clientId,boolean)`.
+The API Key and Client ID should come from the Google Developer Console.
 The boolean determines whether the library will attempt to automatically reauthenticate the user.
 The intended use is to make it false for a page dedicated to signing in so the user can choose which account to use,
 then when you redirect them to the main page you can re-initialize the GVZ library and sign them back in.
@@ -101,8 +102,60 @@ function authChanged(newStatus){
 GVZ.setAuthListener(authChanged);
 ```
 
-### Database Management
-Nothing yet...
+### Database Objects
+The GVZ library turns any spreadsheet into a database object which you can use to make queries and display information about the database to the user.
+It contains the name of the database, it's spreadsheet ID, and an array of page objects.
+Each page object contains the page name and it's page ID.
+
+```javascript
+GVZ.getDatabases();
+>	(Array)[
+		(DatabaseObject){
+			"name": "SHEET NAME",
+			"id": "SHEET ID",
+			"pages": (Array)[
+				(PageObject){
+					"name": "PAGE NAME",
+					"id": "PAGE ID"
+				},
+				...
+			]
+		},
+		...
+	]
+```
+
+**Example:**
+```javascript
+let database = GVZ.getDatabases()[0];
+// Get entire table from page 0
+GVZ.query(`
+	USING ${database.id}
+	FROM ${database.pages[0].id} SELECT *
+`).then(function(response){
+	console.log(response);
+});
+
+```
+
+### Loading Databases
+Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
+It will return a promise that will contain an array of database objects. At any point you can get the latest copy of this array using `GVZ.getDatabases()`.
+
+If you believe a specific database object is no longer accurate, you can call `GVZ.reloadDatabase(id)` and it will return a promise with the up-to-date database object as well as updating the array returned by `GVZ.getDatabases()` to match.
+
+To limit the databases the user can choose from, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`.
+When a flair is set, any databases created with the library will be given the name `[FLAIR] My Database` and `GVZ.reloadDatabases()` will only load databases with `[FLAIR]` in their name.
+It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
+
+**Example:**
+```javascript
+GVZ.setFlair("GVZ DB");
+let databases = GVZ.reloadDatabases();
+for (let i = 0; i < databases.length; i++){
+	
+}
+```
 
 ### Selecting a Database
 Nothing yet...

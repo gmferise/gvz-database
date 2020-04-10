@@ -6,9 +6,11 @@ var GVZ = (function() {
 	var internal = {};
 	var databases = [];
 	var logging = false;
-	var checkReqs = function(){
-		if (typeof(gapi) === undefined){ methods.err('gapi is undefined. Did the API load properly?'); }
-		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+	var flair = "";
+	var checkReqs = function(requireAuth){
+		if (typeof(gapi) === undefined) { methods.err('gapi is undefined. Did the API load properly?'); }
+		if (typeof(GoogleAuth) === undefined) { methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
 	};
 	var GoogleAuth;
 	
@@ -88,7 +90,7 @@ var GVZ = (function() {
 		checkReqs();
 		if (GoogleAuth.isSignedIn.get()) { GoogleAuth.signOut(); }
 		else { GoogleAuth.signIn(); }
-	}
+	};
 	
 	/// GETS CURRENT AUTH STATUS
 	methods.getAuthStatus = function(){
@@ -100,13 +102,13 @@ var GVZ = (function() {
 	methods.signIn = function(){
 		checkReqs();
 		GoogleAuth.signIn();
-	}
+	};
 	
 	/// SIGNS OUT
 	methods.signOut = function(){
 		checkReqs();
 		GoogleAuth.signOut();
-	}
+	};
 	
 	/// SETS THE LISTENER FOR CHANGE IN AUTH STATUS
 	methods.setAuthListener = function(callback){
@@ -126,10 +128,11 @@ var GVZ = (function() {
 	/// ********************
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
-	methods.loadDatabases = function(){
-		checkReqs();
+	methods.reloadDatabases = function(){
+		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
+			if (flair != "") { params += "and name contains '["+flair+"]'"; }
 			gapi.client.drive.files.list({
 				q: params,
 			}).then(function(response) {
@@ -148,7 +151,7 @@ var GVZ = (function() {
 	
 	/// RELOADS ALL INFO ON A DATABASE
 	methods.reloadDatabase = function(id){
-		checkReqs();
+		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
@@ -175,15 +178,29 @@ var GVZ = (function() {
 		});
 	};
 	
-	
-	/// RETURNS DICTIONARY OF ALL DATABASE IDS AND NAMES
+	/// RETURNS DATABASES VARIABLE
 	methods.getDatabases = function(){
-		let output =  {};
+		return databases;
+	};
+	
+	/// RETURNS WHETHER A DATABASE ID IS VALID
+	methods.isDatabase = function(id){
+		let ids = [];
 		for (let i = 0; i < databases.length; i++){
-			output[databases[i].id] = databases[i].name;
+			ids.push(databases[i].id);
 		}
-		return output;
-	}
+		return (ids.includes(id));
+	};
+	
+	/// SETS DATBASE IDENTIFIER
+	methods.setFlair = function(string){
+		flair = ""+string;
+	};
+	
+	/// CLEARS DATABASE IDENTIFIER
+	methods.clearFlair = function(){
+		flair = "";
+	};
 	
 	/// *****************
 	/// * QUERY METHODS *
@@ -191,8 +208,8 @@ var GVZ = (function() {
 	
 	/// MAIN QUERY FUNCTION
 	methods.query = function(string){
-		checkReqs();
-		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.loadDatabases()'); }
+		checkReqs(true);
+		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
 		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
 		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined
 		if (p == "") { p = unparsed.shift(0).toUpperCase(); } // remove any leading "" caused by leading whitespace
@@ -202,7 +219,7 @@ var GVZ = (function() {
 		
 		// Second word should be the database id
 		let database = unparsed.shift(0);
-		if (!Object.keys(methods.getDatabases()).includes(database)) { methods.err('Unknown Database ID "'+database+'"'); }
+		if (!methods.isDatabase(database)) { methods.err('Unknown Database ID "'+database+'"'); }
 		
 		// Third word should be FROM
 		p = unparsed.shift(0).toUpperCase();
