@@ -110,7 +110,7 @@ Each page object contains the page name and it's page ID.
 
 ```javascript
 GVZ.getDatabases();
->    (Array)[
+>   (Array)[
         (DatabaseObject){
             "name": "SHEET NAME",
             "id": "SHEET ID",
