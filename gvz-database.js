@@ -26,6 +26,14 @@ var GVZ = (function() {
 				(PageObject){
 					"name": "PAGE NAME",
 					"id": "PAGE ID"
+					"rows": (Array)[
+						(RowObject){
+							"header": "ROW HEADER",
+							"datatype": "DATATYPE",
+							"pattern": "FOR DATES AND NUMS",
+							"validation": "FOR NUMS AND BOOLS"
+						}
+					]
 				},
 				...
 			]
@@ -156,15 +164,18 @@ var GVZ = (function() {
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
 			}).then(function(response){
-				let pages = {};
-				for (let i = 0; i < response.result.sheets.length; i++){
-					pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
+				let pages = [];
+				let sheets = response.result.sheets;
+				for (let i = 0; i < sheets.length; i++){
+					let page = {}
+					page.title = sheets[i].properties.title;
+					page.id = sheets[i].properties.sheetId;
+					pages.push(page);
 				}
-				let database = {
-					"name":response.result.properties.title,
-					"id":id,
-					"pages": pages
-				};
+				let database = {};
+				database.name = response.result.properties.title;
+				database.id = id;
+				database.pages = pages;
 				// remove any old instances of the database
 				for (let i = 0; i < databases.length; i++){
 					if (databases[i].id == id){
@@ -198,11 +209,24 @@ var GVZ = (function() {
 	
 	/// RETURNS WHETHER A DATABASE ID IS VALID
 	methods.isDatabase = function(id){
-		let ids = [];
 		for (let i = 0; i < databases.length; i++){
-			ids.push(databases[i].id);
+			if (id == databases[i].id) { return true; }
 		}
-		return (ids.includes(id));
+		return false;
+	};
+	
+	/// RETURNS WHETHER A PAGE ID IS VALID ON A DATABASE
+	methods.isPage = function(database,page){
+		let pages = methods.getDatabase(database).pages;
+		for (let i = 0; i < pages.length; i++){
+			if (page == pages[i].id) { return true; }
+		}
+		return false;
+	}
+	
+	/// CREATES A DATABASE
+	methods.createDatabase = function(name,pages){
+		
 	};
 	
 	/// SETS DATBASE IDENTIFIER
@@ -220,39 +244,21 @@ var GVZ = (function() {
 	/// *****************
 	
 	/// MAIN QUERY FUNCTION
-	methods.query = function(string){
-		checkReqs(true);
+	methods.query = function(database,page,string){
+		checkReqs(true);		
 		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
+		// Ensure database is valid
+		if (!methods.isDatabase(database)) { methods.err('Unknown Database ID "'+database+'"'); }
+		if (!methods.isPage(database,page)) { methods.err('Unknown Page ID "'+page+'"'); }
+		
 		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
 		// remove any "" caused by leading/trailing whitespace
 		for (let i = 0; i < unparsed.length; i++){
 			if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
 		}	
-		
-		// First word should be USING
-		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined
-		if (p != 'USING') { methods.err('Unexpected token "'+p+'" (expected USING)'); }
-		
-		// Second word should be the database id
-		let database = unparsed.shift(0);
-		if (!methods.isDatabase(database)) { methods.err('Unknown Database ID "'+database+'"'); }
-		
-		// Third word should be FROM
-		p = unparsed.shift(0).toUpperCase();
-		if (p != 'FROM') { methods.err('Unexpected token "'+p+'" (expected FROM)'); }
-		
-		// Fourth word should be the page index
-		let page = parseInt(unparsed.shift(0));
-		if (page < 0 || page >= databases[database].pages.length || isNaN(page)) { methods.err('Unknown Page ID "'+page+'"'); }
-		
-		// Fifth word should be the command
-		// The rest is handled by each command handler
+		// Look for commands
 		p = unparsed.shift(0).toUpperCase();
 		switch (p){
-			case 'CREATE':
-				GVZ.log(p);
-			case 'DELETE':
-				GVZ.log(p);
 			case 'SELECT':
 				GVZ.log(p);
 			case 'UPDATE':
@@ -260,7 +266,7 @@ var GVZ = (function() {
 			case 'APPEND':
 				GVZ.log(p);
 			default:
-				methods.err('Unexpected token "'+p+'" (expected CREATE DELETE SELECT UPDATE APPEND)');
+				methods.err('Unexpected token "'+p+'" (expected SELECT UPDATE APPEND)');
 		}
 	};
 	
