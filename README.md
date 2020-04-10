@@ -28,6 +28,8 @@ GVZ.toggleLogging();
 GVZ.log("This will not print to the console.");
 GVZ.toggleLogging();
 GVZ.log("This will print to the console.");
+GVZ.setLogging(false);
+GVZ.log("This will not print to the console.");
 ```
 
 ### Initializing the Library

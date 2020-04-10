@@ -38,10 +38,12 @@ var GVZ = (function() {
 		if (logging){ console.log(string); }
 	};
 	
+	/// SET LOGGING
 	methods.setLogging(bool){
 		logging = bool;
 	}
 	
+	/// TOGGLE LOGGING
 	methods.toggleLogging(bool){
 		logging = (!logging);
 	}
