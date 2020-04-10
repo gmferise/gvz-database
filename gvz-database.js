@@ -69,20 +69,30 @@ var GVZ = (function() {
 	
 	/// TOGGLES AUTH STATUS AND TRIGGERS DIALOGUE OR SIGNS OUT
 	methods.toggleAuth = function(){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.loadAuth()'; }
+		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
 		if (GoogleAuth.isSignedIn.get()) { GoogleAuth.signOut(); }
 		else { GoogleAuth.signIn(); }
 	}
 	
 	/// GETS CURRENT AUTH STATUS
 	methods.getAuthStatus = function(){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.loadAuth()'; }
+		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
 		return GoogleAuth.isSignedIn.get();
 	};
 	
+	/// SIGNS IN 
+	methods.signIn = function(){
+		GoogleAuth.signIn();
+	}
+	
+	/// SIGNS OUT
+	methods.signOut = function(){
+		GoogleAuth.signOut();
+	}
+	
 	/// SETS THE LISTENER FOR CHANGE IN AUTH STATUS
 	methods.setAuthListener = function(callback){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.loadAuth()'; }
+		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
 		authStatusListener = function(){ callback(GoogleAuth.isSignedIn.get()); };
 	};
 	
