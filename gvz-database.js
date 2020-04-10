@@ -183,6 +183,18 @@ var GVZ = (function() {
 		return databases;
 	};
 	
+	/// RETURNS INFO ON SINGLE DATABASE
+	methods.getDatabase = function(id){
+		if (methods.isDatabase(id)){
+			for (let i = 0; i < databases.length; i++){
+				if (databases[i].id == id) { return databases[i]; }
+			}
+		}
+		else {
+			methods.err('Unknown Database ID "'+database+'"');
+		}
+	};
+	
 	/// RETURNS WHETHER A DATABASE ID IS VALID
 	methods.isDatabase = function(id){
 		let ids = [];

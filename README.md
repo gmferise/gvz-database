@@ -95,6 +95,7 @@ Your listener function should take one boolean parameter which will be the user'
 
 **Example:**
 ```javascript
+// Update UI when user's auth changes
 function authChanged(newStatus){
     console.log("The user's auth status is now "+newStatus);
     // TODO: Update some UI stuff
@@ -127,8 +128,8 @@ GVZ.getDatabases();
 
 **Example:**
 ```javascript
+// Print out the entire table on the first page of the first database
 let database = GVZ.getDatabases()[0];
-// Get entire table from page 0
 GVZ.query(`
 	USING ${database.id}
 	FROM ${database.pages[0].id} SELECT *
@@ -141,6 +142,7 @@ GVZ.query(`
 ### Loading Databases
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
 It will return a promise that will contain an array of database objects. At any point you can get the latest copy of this array using `GVZ.getDatabases()`.
+You can also get the information of a singular database using `getDatabase(id)` so you don't have to search the array yourself.
 
 If you believe a specific database object is no longer accurate, you can call `GVZ.reloadDatabase(id)` and it will return a promise with the up-to-date database object as well as updating the array returned by `GVZ.getDatabases()` to match.
 
@@ -150,13 +152,19 @@ It should be noted that the brackets *are* written in the name, and you do not n
 
 **Example:**
 ```javascript
-GVZ.setFlair("GVZ DB");
+// Populate a dropdown to let user pick a database
+GVZ.setFlair("gvzDB");
 let databases = GVZ.reloadDatabases();
+let dropdown = document.getElementById('db-list');
 for (let i = 0; i < databases.length; i++){
-	
+	let item = document.createElement('p');
+	item.innerText = databases[i].name;
+	item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
+	dropdown.appendChild(item);
 }
 ```
 
 ### Selecting a Database
 Nothing yet...
 
+### Querying Databases
