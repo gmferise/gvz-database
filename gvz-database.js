@@ -61,7 +61,7 @@ var GVZ = (function() {
 		}).then(function(response){
 			let pages = {};
 			for (let i = 0; i < response.result.sheets.length; i++){
-				pages[response.result.sheets[i].sheetId] = response.result.sheets[i].title;
+				pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
 			}
 			databases[id] = { "name":response.result.properties.title, "pages":pages };
 		});
