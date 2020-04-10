@@ -89,7 +89,7 @@ The library makes this easy with two functions.
 
 `GVZ.setAuthListener(yourFunction)` will tell the library to call yourFunction every time the user's auth status changes.
 
-`GVZ.clearAuthLisener()` will clear whatever listener function the library is currently sending events to.
+`GVZ.clearAuthListener()` will clear whatever listener function the library is currently sending events to.
 
 Your listener function should take one boolean parameter which will be the user's new auth status.
 
