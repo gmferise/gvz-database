@@ -9,7 +9,8 @@ var GVZ = (function() {
 	var GoogleAuth;
 	
 	/// USER VARIABLES
-	var authStatusListener = function(){};
+	var authStatusListener = function(newStatus){};
+	var databasesListener = function(){};
 	
 	/* var databases = 
 	(Array)[
@@ -27,59 +28,30 @@ var GVZ = (function() {
 		...
 	]
 	*/
-
-	/// MAIN QUERY FUNCTION
-	methods.query = function(string){
-		if (Object.keys(databases).length === 0){ throw 'GVZ Error: No databases are known. Try GVZ.loadDatabases()'; }
-		let unparsed = string.split(' ');
-		let p = unparsed.pop(0);
-		switch (p){
-			case 'FROM':
-				methods.log(unparsed);
-			default:
-				throw 'GVZ Error: Unexpected token "'+p+'" (expected FROM)';
-		}
-	};
 	
+	/// *******************
+	/// * LOGGING METHODS *
+	/// *******************
+	
+	/// LIBRARY EXTRA LOGS
 	methods.log = function(string){
 		if (logging){ console.log(string); }
 	};
 	
-	/// LOADS DATABASES FROM USER'S DRIVE
-	methods.loadDatabases = function(){
-		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
-		gapi.client.drive.files.list({
-			q: params,
-		}).then(function(response) {
-			let dbs = response.result.files;
-			for (let i = 0; i < dbs.length; i++){
-				methods.reloadDatabase(dbs[i].id);
-			}
-		});
+	// LIBRARY ERRORS
+	methods.err = function(string){
+		throw 'GVZ Error: '+string;
 	};
 	
-	/// RELOADS ALL INFO ON A DATABASE INTO databases
-	methods.reloadDatabase = function(id){
-		gapi.client.sheets.spreadsheets.get({
-			spreadsheetId: id
-		}).then(function(response){
-			let pages = {};
-			for (let i = 0; i < response.result.sheets.length; i++){
-				pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
-			}
-			databases.push({
-				"name":response.result.properties.title,
-				"id":id,
-				"pages": pages
-			});
-		});
-	};
+	/// ****************
+	/// * AUTH METHODS *
+	/// ****************
 	
 	/// LOADS THE GOOGLEAUTH VARIABLE
 	methods.initialize = function(apiKey,clientId,keepAuth){
 		// Check if gapi can be used
 		keepAuth = (keepAuth === true);
-		if (typeof(gapi) === undefined){ throw 'GVZ Error: gapi is undefined. Did the API load properly?'; }
+		if (typeof(gapi) === undefined){ methods.err('gapi is undefined. Did the API load properly?'); }
 		// Call gapi load function
 		gapi.load('client:auth2', function(){
 			// Then initialize its client
@@ -101,14 +73,14 @@ var GVZ = (function() {
 	
 	/// TOGGLES AUTH STATUS AND TRIGGERS DIALOGUE OR SIGNS OUT
 	methods.toggleAuth = function(){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
+		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
 		if (GoogleAuth.isSignedIn.get()) { GoogleAuth.signOut(); }
 		else { GoogleAuth.signIn(); }
 	}
 	
 	/// GETS CURRENT AUTH STATUS
 	methods.getAuthStatus = function(){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
+		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
 		return GoogleAuth.isSignedIn.get();
 	};
 	
@@ -124,15 +96,104 @@ var GVZ = (function() {
 	
 	/// SETS THE LISTENER FOR CHANGE IN AUTH STATUS
 	methods.setAuthListener = function(callback){
-		if (typeof(GoogleAuth) === undefined){ throw 'GVZ Error: GoogleAuth is undefined. Try calling GVZ.initialize()'; }
+		if (typeof(GoogleAuth) === undefined){ methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
 		authStatusListener = function(){ callback(GoogleAuth.isSignedIn.get()); };
 	};
 	
 	/// CLEARS THE LISTENER FOR CHANGE IN AUTH STATUS
 	methods.clearAuthListener = function(){
-		authStatusListener = function(){};
+		authStatusListener = function(newStatus){};
 	};
+
+	/// ********************
+	/// * DATABASE METHODS *
+	/// ********************
+	
+	/// LOADS DATABASES FROM USER'S DRIVE
+	methods.loadDatabases = function(){
+		let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
+		gapi.client.drive.files.list({
+			q: params,
+		}).then(function(response) {
+			let dbs = response.result.files;
+			for (let i = 0; i < dbs.length; i++){
+				methods.reloadDatabase(dbs[i].id);
+			}
+		});
+	};
+	
+	/// RELOADS ALL INFO ON A DATABASE
+	methods.reloadDatabase = function(id){
+		gapi.client.sheets.spreadsheets.get({
+			spreadsheetId: id
+		}).then(function(response){
+			let pages = {};
+			for (let i = 0; i < response.result.sheets.length; i++){
+				pages[response.result.sheets[i].properties.sheetId] = response.result.sheets[i].properties.title;
+			}
+			databases.push({
+				"name":response.result.properties.title,
+				"id":id,
+				"pages": pages
+			});
+		});
+	};
+	
+	/// RETURNS DICTIONARY OF ALL DATABASE IDS AND NAMES
+	methods.getDatabases = function(){
+		let output =  {};
+		for (let i = 0; i < databases.length; i++){
+			output[databases[i].id] = databases[i].name;
+		}
+		return output;
+	}
+	
+	/// *****************
+	/// * QUERY METHODS *
+	/// *****************
+	
+	/// MAIN QUERY FUNCTION
+	methods.query = function(string){
+		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.loadDatabases()'); }
+		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
+		let p = unparsed.shift(0).toUpperCase(); // removes and returns index 0 or undefined
+		if (p == "") { p = unparsed.shift(0).toUpperCase(); } // remove any leading "" caused by leading whitespace
 		
+		// First word should be USING
+		if (p != 'USING') { methods.err('Unexpected token "'+p+'" (expected USING)'); }
+		
+		// Second word should be the database id
+		let database = unparsed.shift(0);
+		if (!Object.keys(methods.getDatabases()).includes(database)) { methods.err('Unknown Database ID "'+database+'"'); }
+		
+		// Third word should be FROM
+		p = unparsed.shift(0).toUpperCase();
+		if (p != 'FROM') { methods.err('Unexpected token "'+p+'" (expected FROM)'); }
+		
+		// Fourth word should be the page index
+		let page = parseInt(unparsed.shift(0));
+		if (page < 0 || page >= databases[database].pages.length || isNaN(page)) { methods.err('Unknown Page ID "'+page+'"'); }
+		
+		// Fifth word should be the command
+		// The rest is handled by each command handler
+		p = unparsed.shift(0).toUpperCase();
+		switch (p){
+			case 'CREATE':
+				GVZ.log(p);
+			case 'DELETE':
+				GVZ.log(p);
+			case 'SELECT':
+				GVZ.log(p);
+			case 'UPDATE':
+				GVZ.log(p);
+			case 'APPEND':
+				GVZ.log(p);
+			default:
+				methods.err('Unexpected token "'+p+'" (expected CREATE DELETE SELECT UPDATE APPEND)');
+		}
+	};
+	
+	/// EXPOSE METHODS TO USER
 	return methods;
 	
 })();
