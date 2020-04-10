@@ -142,10 +142,10 @@ It should be noted that the brackets *are* written in the name, and you do not n
 // Both pairs of functions will return the same thing.
 // The reload functions are asynchronous and return the up-to-date versions in a promise
 // The get functions are instant and return the last known values
-GVZ.reloadDatabases().then(function(databases){ console.log(databases); }
+GVZ.reloadDatabases().then(function(databases){ console.log(databases); });
 console.log(GVZ.getDatabases());
 
-GVZ.reloadDatabase(id).then(function(database){ console.log(database); }
+GVZ.reloadDatabase(id).then(function(database){ console.log(database); });
 console.log(GVZ.getDatabase(id));
 ```
 
