@@ -41,12 +41,12 @@ var GVZ = (function() {
 	/// SET LOGGING
 	methods.setLogging(bool){
 		logging = bool;
-	}
+	};
 	
 	/// TOGGLE LOGGING
 	methods.toggleLogging(bool){
 		logging = (!logging);
-	}
+	};
 	
 	/// LIBRARY ERRORS
 	methods.err = function(string){
