@@ -110,20 +110,20 @@ Each page object contains the page name and it's page ID.
 
 ```javascript
 GVZ.getDatabases();
->	(Array)[
-		(DatabaseObject){
-			"name": "SHEET NAME",
-			"id": "SHEET ID",
-			"pages": (Array)[
-				(PageObject){
-					"name": "PAGE NAME",
-					"id": "PAGE ID"
-				},
-				...
-			]
-		},
-		...
-	]
+>    (Array)[
+        (DatabaseObject){
+            "name": "SHEET NAME",
+            "id": "SHEET ID",
+            "pages": (Array)[
+                (PageObject){
+                    "name": "PAGE NAME",
+                    "id": "PAGE ID"
+                },
+                ...
+            ]
+        },
+        ...
+    ]
 ```
 
 **Example:**
@@ -131,10 +131,10 @@ GVZ.getDatabases();
 // Print out the entire table on the first page of the first database
 let database = GVZ.getDatabases()[0];
 GVZ.query(`
-	USING ${database.id}
-	FROM ${database.pages[0].id} SELECT *
+    USING ${database.id}
+    FROM ${database.pages[0].id} SELECT *
 `).then(function(response){
-	console.log(response);
+    console.log(response);
 });
 
 ```
@@ -157,10 +157,10 @@ GVZ.setFlair("gvzDB");
 let databases = GVZ.reloadDatabases();
 let dropdown = document.getElementById('db-list');
 for (let i = 0; i < databases.length; i++){
-	let item = document.createElement('p');
-	item.innerText = databases[i].name;
-	item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
-	dropdown.appendChild(item);
+    let item = document.createElement('p');
+    item.innerText = databases[i].name;
+    item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
+    dropdown.appendChild(item);
 }
 ```
 
