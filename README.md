@@ -111,36 +111,40 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 Below is the format of what `GVZ.getDatabases()` returns. 
 
 ```scss
+{
+
 GVZ.getDatabases() = [
-  > {database object}
+  > (database object)
         |__ .name = string
         |__ .id = string
         |__ .pages = [
-              > {page object}
+              > (page object)
                     |___.name = string
                     |___.id = string
                     |___.rows = [
-                          > {row object}
+                          > (row object)
                                 |___.header = string
-                                |___.datatype = {datatype object}
+                                |___.datatype = (datatype object)
                                 |                   |___.type = string
                                 |                   |___.pattern = string
                                 |               
-                                |___.validation = {validation object}
+                                |___.validation = (validation object)
                                                     |___.strict = boolean
-                                                    |___.condition = {condition object}
+                                                    |___.condition = (condition object)
                                                                         |___.type = string
                                                                         |___.values = [
-                                                                              > {value object}
+                                                                              > (value object)
                                                                                     |___.userEnteredValue = string
-                                                                              > {value object}...
+                                                                              > (value object)...
                                                                             ]
-                          > {row object}...
+                          > (row object)...
                         ]
-              > {page object}...
+              > (page object)...
             ]
-  > {database object}...
+  > (database object)...
 ]
+
+}
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
