@@ -116,7 +116,7 @@ GVZ.getDatabases();
 >   (Array)[
         (DatabaseObject){
             .name = string
-			.id = string
+            .id = string
             .pages = (Array)[
                 (PageObject){
                     .name = string
@@ -125,20 +125,20 @@ GVZ.getDatabases();
                         (RowObject){
                             .header = string
                             .datatype = (DatatypeObject){
-								.type = string
-								.pattern = string
-							}
+                                .type = string
+                                .pattern = string
+                            }
                             .validation = (ValidationObject){
-								.condition = (ConditionObject){
-									.type = string
-									.values = (Array)[
-										(ValueObject){
-											.userEnteredValue = string
-										}
-									]
-								}
-								.strict = boolean
-							}
+                                .condition = (ConditionObject){
+                                    .type = string
+                                    .values = (Array)[
+                                        (ValueObject){
+                                            .userEnteredValue = string
+                                        }
+                                    ]
+                                }
+                                .strict = boolean
+                            }
                         }
                     ]
                 },
