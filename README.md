@@ -111,28 +111,28 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 It contains the name of the database, it's spreadsheet ID, and an array of page objects.
 Each page object contains the page name and it's page ID.
 
-```avr assembler
+```scss
 // GVZ Databases Format
-(Array)[
-    (DatabaseObject){
+(array)[
+    (object){
         .name = string
         .id = string
-        .pages = (Array)[
-            (PageObject){
+        .pages = (array)[
+            (object){
                 .name = string
                 .id = string
-                .rows = (Array)[
-                    (RowObject){
+                .rows = (array)[
+                    (object){
                         .header = string
-                        .datatype = (DatatypeObject){
+                        .datatype = (object){
                             .type = string
                             .pattern = string
                         }
-                        .validation = (ValidationObject){
-                            .condition = (ConditionObject){
+                        .validation = (object){
+                            .condition = (object){
                                 .type = string
-                                .values = (Array)[
-                                    (ValueObject){
+                                .values = (array)[
+                                    (object){
                                         .userEnteredValue = string
                                     }
                                 ]
