@@ -111,16 +111,16 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 Below is the format of what `GVZ.getDatabases()` returns. 
 
 ```scss
-GVZ.getDatabases() = {array}[
-  > (database object)
+GVZ.getDatabases() = [
+  @ (database object)
         |___.name = string
         |___.id = string
-        |___.pages = {array}[
-              > (page object)
+        |___.pages = [
+              @ (page object)
                     |___.name = string
                     |___.id = string
-                    |___.rows = {array}[
-                          > (row object)
+                    |___.rows = [
+                          @ (row object)
                                 |___.header = string
                                 |___.datatype = (datatype object)
                                 |                   |___.type = string
@@ -130,16 +130,16 @@ GVZ.getDatabases() = {array}[
                                                     |___.strict = boolean
                                                     |___.condition = (condition object)
                                                                         |___.type = string
-                                                                        |___.values = {array}[
-                                                                              > (value object)
+                                                                        |___.values = [
+                                                                              @ (value object)
                                                                                     |___.userEnteredValue = string
-                                                                              > (value object)...
+                                                                              @ (value object)...
                                                                             ]
-                          > (row object)...
+                          @ (row object)...
                         ]
-              > (page object)...
+              @ (page object)...
             ]
-  > (database object)...
+  @ (database object)...
 ]
 ```
 
