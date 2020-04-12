@@ -112,15 +112,15 @@ Below is the format of what `GVZ.getDatabases()` returns.
 
 ```scss
 GVZ.getDatabases() = [
-  @ (database object)
+  > (database object)
         |___.name = string
         |___.id = string
         |___.pages = [
-              @ (page object)
+              > (page object)
                     |___.name = string
                     |___.id = string
                     |___.rows = [
-                          @ (row object)
+                          > (row object)
                                 |___.header = string
                                 |___.datatype = (datatype object)
                                 |                   |___.type = string
@@ -131,15 +131,15 @@ GVZ.getDatabases() = [
                                                     |___.condition = (condition object)
                                                                         |___.type = string
                                                                         |___.values = [
-                                                                              @ (value object)
+                                                                              > (value object)
                                                                                     |___.userEnteredValue = string
-                                                                              @ (value object)...
+                                                                              > (value object)...
                                                                             ]
-                          @ (row object)...
+                          > (row object)...
                         ]
-              @ (page object)...
+              > (page object)...
             ]
-  @ (database object)...
+  > (database object)...
 ]
 ```
 
