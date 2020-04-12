@@ -112,39 +112,39 @@ Below is the format of what `GVZ.getDatabases()` returns.
 
 ```scss
 GVZ.getDatabases() = (array)[
-    (database object){
-        .name = string
-        .id = string
-        .pages = (array)[
-            (page object){
-                .name = string
-                .id = string
-                .rows = (array)[
-                    (row object){
-                        .header = string
-                        .datatype = (datatype object){
-                            .type = string
-                            .pattern = string
-                        }
-                        .validation = (validation object){
-                            .strict = boolean
-                            .condition = (condition object){
-                                .type = string
-                                .values = (array)[
-                                    (value object){
-                                        .userEnteredValue = string
-                                    },
-                                    ...
-                                ]
-                            }
-                        }
-                    }
-                ]
-            },
-            ...
-        ]
-    },
-    ...
+|   (database object){
+|   |   .name = string
+|   |   .id = string
+|   |   .pages = (array)[
+|   |   |   (page object){
+|   |   |   |   .name = string
+|   |   |   |   .id = string
+|   |   |   |   .rows = (array)[
+|   |   |   |   |   (row object){
+|   |   |   |   |   |   .header = string
+|   |   |   |   |   |   .datatype = (datatype object){
+|   |   |   |   |   |   |   .type = string
+|   |   |   |   |   |   |   .pattern = string
+|   |   |   |   |   |   }
+|   |   |   |   |   |   .validation = (validation object){
+|   |   |   |   |   |   |   .strict = boolean
+|   |   |   |   |   |   |   .condition = (condition object){
+|   |   |   |   |   |   |   |   .type = string
+|   |   |   |   |   |   |   |   .values = (array)[
+|   |   |   |   |   |   |   |   |   (value object){
+|   |   |   |   |   |   |   |   |   |   .userEnteredValue = string
+|   |   |   |   |   |   |   |   |   },
+|   |   |   |   |   |   |   |   |   ...
+|   |   |   |   |   |   |   |   ]
+|   |   |   |   |   |   |   }
+|   |   |   |   |   |   }
+|   |   |   |   |   }
+|   |   |   |   ]
+|   |   |   },
+|   |   |   ...
+|   |   ]
+|   },
+|   ...
 ]
 ```
 
