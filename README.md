@@ -111,40 +111,35 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 Below is the format of what `GVZ.getDatabases()` returns. 
 
 ```scss
-GVZ.getDatabases() = (array)[
-:   (database object){
-:   :   .name = string
-:   :   .id = string
-:   :   .pages = (array)[
-:   :   :   (page object){
-:   :   :   :   .name = string
-:   :   :   :   .id = string
-:   :   :   :   .rows = (array)[
-:   :   :   :   :   (row object){
-:   :   :   :   :   :   .header = string
-:   :   :   :   :   :   .datatype = (datatype object){
-:   :   :   :   :   :   :   .type = string
-:   :   :   :   :   :   :   .pattern = string
-:   :   :   :   :   :   }
-:   :   :   :   :   :   .validation = (validation object){
-:   :   :   :   :   :   :   .strict = boolean
-:   :   :   :   :   :   :   .condition = (condition object){
-:   :   :   :   :   :   :   :   .type = string
-:   :   :   :   :   :   :   :   .values = (array)[
-:   :   :   :   :   :   :   :   :   (value object){
-:   :   :   :   :   :   :   :   :   :   .userEnteredValue = string
-:   :   :   :   :   :   :   :   :   },
-:   :   :   :   :   :   :   :   :   ...
-:   :   :   :   :   :   :   :   ]
-:   :   :   :   :   :   :   }
-:   :   :   :   :   :   }
-:   :   :   :   :   }
-:   :   :   :   ]
-:   :   :   },
-:   :   :   ...
-:   :   ]
-:   },
-:   ...
+GVZ.getDatabases() = [
+ -> (database object)
+        |__ .name = string
+        |__ .id = string
+        |__ .pages = [
+             -> (page object)
+                    |___.name = string
+                    |___.id = string
+                    |___.rows = [
+                         -> (row object)
+                                |___.header = string
+                                |___.datatype = (datatype object)
+                                |                   |___.type = string
+                                |                   |___.pattern = string
+                                |               
+                                |___.validation = (validation object)
+                                                    |___.strict = boolean
+                                                    |___.condition = (condition object)
+                                                                        |___.type = string
+                                                                        |___.values = [
+                                                                             -> (value object)
+                                                                                    |___.userEnteredValue = string
+                                                                             -> (value object)...
+                                                                            ]
+                         -> (row object)...
+                        ]
+             -> (page object)...
+            ]
+ -> (database object)...
 ]
 ```
 
