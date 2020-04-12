@@ -206,7 +206,7 @@ var GVZ = (function() {
 							row.header = hrow[r].formattedValue;
 							row.datatype = drow[r].userEnteredFormat.numberFormat;
 							row.validation = drow[r].dataValidation;
-							databases.pages[i].rows.push(row);
+							database.pages[i].rows.push(row);
 						}
 					}
 					
