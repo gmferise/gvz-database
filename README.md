@@ -111,42 +111,42 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 It contains the name of the database, it's spreadsheet ID, and an array of page objects.
 Each page object contains the page name and it's page ID.
 
-```javascript
-GVZ.getDatabases();
->   (Array)[
-        (DatabaseObject){
-            .name = string
-            .id = string
-            .pages = (Array)[
-                (PageObject){
-                    .name = string
-                    .id = string
-                    .rows = (Array)[
-                        (RowObject){
-                            .header = string
-                            .datatype = (DatatypeObject){
-                                .type = string
-                                .pattern = string
-                            }
-                            .validation = (ValidationObject){
-                                .condition = (ConditionObject){
-                                    .type = string
-                                    .values = (Array)[
-                                        (ValueObject){
-                                            .userEnteredValue = string
-                                        }
-                                    ]
-                                }
-                                .strict = boolean
-                            }
-                        }
-                    ]
-                },
-                ...
-            ]
-        },
-        ...
-    ]
+```css
+// GVZ Databases Format
+(Array)[
+	(DatabaseObject){
+		.name = string
+		.id = string
+		.pages = (Array)[
+			(PageObject){
+				.name = string
+				.id = string
+				.rows = (Array)[
+					(RowObject){
+						.header = string
+						.datatype = (DatatypeObject){
+							.type = string
+							.pattern = string
+						}
+						.validation = (ValidationObject){
+							.condition = (ConditionObject){
+								.type = string
+								.values = (Array)[
+									(ValueObject){
+										.userEnteredValue = string
+									}
+								]
+							}
+							.strict = boolean
+						}
+					}
+				]
+			},
+			...
+		]
+	},
+	...
+]
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
