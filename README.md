@@ -134,7 +134,7 @@ GVZ.getDatabases() = (array)[
                                     (object){
                                         .userEnteredValue = string
                                     },
-									...
+                                    ...
                                 ]
                             }
                             .strict = boolean
