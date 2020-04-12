@@ -108,36 +108,35 @@ Nothing yet...
 
 ### Loading and Using Databases
 The GVZ library turns any spreadsheet into a database object which you can use to make queries and display information about the database to the user.
-It contains the name of the database, it's spreadsheet ID, and an array of page objects.
-Each page object contains the page name and it's page ID.
+Below is the format of what `GVZ.getDatabases()` returns. 
 
 ```scss
 GVZ.getDatabases() = (array)[
-    (object){
+    (database object){
         .name = string
         .id = string
         .pages = (array)[
-            (object){
+            (page object){
                 .name = string
                 .id = string
                 .rows = (array)[
-                    (object){
+                    (row object){
                         .header = string
-                        .datatype = (object){
+                        .datatype = (datatype object){
                             .type = string
                             .pattern = string
                         }
-                        .validation = (object){
-                            .condition = (object){
+                        .validation = (validation object){
+                            .strict = boolean
+                            .condition = (condition object){
                                 .type = string
                                 .values = (array)[
-                                    (object){
+                                    (value object){
                                         .userEnteredValue = string
                                     },
                                     ...
                                 ]
                             }
-                            .strict = boolean
                         }
                     }
                 ]
