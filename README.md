@@ -112,41 +112,41 @@ It contains the name of the database, it's spreadsheet ID, and an array of page 
 Each page object contains the page name and it's page ID.
 
 ```scss
-// GVZ Databases Format
-(array)[
-    (object){
-        .name = string
-        .id = string
-        .pages = (array)[
-            (object){
-                .name = string
-                .id = string
-                .rows = (array)[
-                    (object){
-                        .header = string
-                        .datatype = (object){
-                            .type = string
-                            .pattern = string
-                        }
-                        .validation = (object){
-                            .condition = (object){
+GVZ.getDatabases() 
+>   (array)[
+        (object){
+            .name = string
+            .id = string
+            .pages = (array)[
+                (object){
+                    .name = string
+                    .id = string
+                    .rows = (array)[
+                        (object){
+                            .header = string
+                            .datatype = (object){
                                 .type = string
-                                .values = (array)[
-                                    (object){
-                                        .userEnteredValue = string
-                                    }
-                                ]
+                                .pattern = string
                             }
-                            .strict = boolean
+                            .validation = (object){
+                                .condition = (object){
+                                    .type = string
+                                    .values = (array)[
+                                        (object){
+                                            .userEnteredValue = string
+                                        }
+                                    ]
+                                }
+                                .strict = boolean
+                            }
                         }
-                    }
-                ]
-            },
-            ...
-        ]
-    },
-    ...
-]
+                    ]
+                },
+                ...
+            ]
+        },
+        ...
+    ]
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
