@@ -111,7 +111,7 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 It contains the name of the database, it's spreadsheet ID, and an array of page objects.
 Each page object contains the page name and it's page ID.
 
-```asciidoc
+```avr
 // GVZ Databases Format
 (Array)[
     (DatabaseObject){
