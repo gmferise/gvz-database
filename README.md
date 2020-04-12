@@ -111,17 +111,15 @@ The GVZ library turns any spreadsheet into a database object which you can use t
 Below is the format of what `GVZ.getDatabases()` returns. 
 
 ```scss
-{
-
-GVZ.getDatabases() = [
+GVZ.getDatabases() = {array}[
   > (database object)
-        |__ .name = string
-        |__ .id = string
-        |__ .pages = [
+        |___.name = string
+        |___.id = string
+        |___.pages = {array}[
               > (page object)
                     |___.name = string
                     |___.id = string
-                    |___.rows = [
+                    |___.rows = {array}[
                           > (row object)
                                 |___.header = string
                                 |___.datatype = (datatype object)
@@ -132,7 +130,7 @@ GVZ.getDatabases() = [
                                                     |___.strict = boolean
                                                     |___.condition = (condition object)
                                                                         |___.type = string
-                                                                        |___.values = [
+                                                                        |___.values = {array}[
                                                                               > (value object)
                                                                                     |___.userEnteredValue = string
                                                                               > (value object)...
@@ -143,8 +141,6 @@ GVZ.getDatabases() = [
             ]
   > (database object)...
 ]
-
-}
 ```
 
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
