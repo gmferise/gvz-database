@@ -115,18 +115,30 @@ Each page object contains the page name and it's page ID.
 GVZ.getDatabases();
 >   (Array)[
         (DatabaseObject){
-            "name": "SHEET NAME",
-            "id": "SHEET ID",
-            "pages": (Array)[
+            .name = string
+			.id = string
+            .pages = (Array)[
                 (PageObject){
-                    "name": "PAGE NAME",
-                    "id": "PAGE ID"
-                    "rows": (Array)[
+                    .name = string
+                    .id = string
+                    .rows = (Array)[
                         (RowObject){
-                            "header": "ROW HEADER",
-                            "datatype": "DATATYPE",
-                            "pattern": "FOR DATES AND NUMS",
-                            "validation": "FOR NUMS AND BOOLS"
+                            .header = string
+                            .datatype = (DatatypeObject){
+								.type = string
+								.pattern = string
+							}
+                            .validation = (ValidationObject){
+								.condition = (ConditionObject){
+									.type = string
+									.values = (Array)[
+										(ValueObject){
+											.userEnteredValue = string
+										}
+									]
+								}
+								.strict = boolean
+							}
                         }
                     ]
                 },

@@ -203,9 +203,12 @@ var GVZ = (function() {
 						let validations = [];
 						for (let r = 0; r < hrow.length; r++){
 							let row = {};
-							row.header = hrow[r].formattedValue;
-							row.datatype = drow[r].userEnteredFormat.numberFormat;
-							row.validation = drow[r].dataValidation;
+							try { row.header = hrow[r].formattedValue; }
+							catch (e) { row.header = ""; }
+							try { row.datatype = drow[r].userEnteredFormat.numberFormat; }
+							catch (e) { row.datatype = undefined; }
+							try { row.validation = drow[r].dataValidation; }
+							catch (e) { row.validation = undefined; }
 							database.pages[i].rows.push(row);
 						}
 					}
