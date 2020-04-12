@@ -121,6 +121,14 @@ GVZ.getDatabases();
                 (PageObject){
                     "name": "PAGE NAME",
                     "id": "PAGE ID"
+                    "rows": (Array)[
+                        (RowObject){
+                            "header": "ROW HEADER",
+                            "datatype": "DATATYPE",
+                            "pattern": "FOR DATES AND NUMS",
+                            "validation": "FOR NUMS AND BOOLS"
+                        }
+                    ]
                 },
                 ...
             ]

@@ -30,7 +30,6 @@ var GVZ = (function() {
 						(RowObject){
 							"header": "ROW HEADER",
 							"datatype": "DATATYPE",
-							"pattern": "FOR DATES AND NUMS",
 							"validation": "FOR NUMS AND BOOLS"
 						}
 					]
@@ -137,20 +136,25 @@ var GVZ = (function() {
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.reloadDatabases = function(){
+		methods.log('Reloading all databases...');
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
 			if (flair != "") { params += "and name contains '["+flair+"]'"; }
+			// get sheet listing
 			gapi.client.drive.files.list({
 				q: params,
 			}).then(function(response) {
+				// clear databases and reload each new one
 				let newDatabases = response.result.files;
 				databases = [];
-				let successes = 0;
 				for (let i = 0; i < newDatabases.length; i++){
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
-						successes++;
-						if (successes >= newDatabases.length){ resolve(databases); }
+						// after every reload check to see if we did them all
+						if (databases.length >= newDatabases.length){ 
+							methods.log('Successfully reloaded all databases.');
+							resolve(databases);
+						}
 					});
 				}
 			});
@@ -159,33 +163,65 @@ var GVZ = (function() {
 	
 	/// RELOADS ALL INFO ON A DATABASE
 	methods.reloadDatabase = function(id){
+		methods.log('Reloading database '+id+'...');
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
+			// get spreadsheet name, id, and pages
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
-			}).then(function(response){
-				let pages = [];
-				let sheets = response.result.sheets;
-				for (let i = 0; i < sheets.length; i++){
-					let page = {}
-					page.title = sheets[i].properties.title;
-					page.id = sheets[i].properties.sheetId;
-					pages.push(page);
-				}
-				let database = {};
+			}).then(function(response){				
+				// create new database object
+				var database = {};
 				database.name = response.result.properties.title;
 				database.id = id;
-				database.pages = pages;
-				// remove any old instances of the database
-				for (let i = 0; i < databases.length; i++){
-					if (databases[i].id == id){
-						databases.splice(i,1);
-						i--;
-					}
+				database.pages = [];
+				let sheets = response.result.sheets; // response's pages
+				let ranges = [];
+				
+				// start building the pages
+				for (let i = 0; i < sheets.length; i++){
+					let page = {};
+					page.name = sheets[i].properties.title;
+					page.id = sheets[i].properties.sheetId;
+					page.rows = [];
+					database.pages.push(page);
+					ranges.push(sheets[i].properties.title+'!1:2');
 				}
-				// add the new version
-				databases.push(database);
-				resolve(database);
+				
+				// get extra page data
+				gapi.client.sheets.spreadsheets.get({
+					spreadsheetId: id,
+					ranges: ranges,
+					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
+				}).then(function(response){
+					// finish building the pages
+					for (let i = 0; i < response.result.sheets.length; i++){
+						let hrow = response.result.sheets[i].data[0].rowData[0].values;
+						let drow = response.result.sheets[i].data[0].rowData[1].values;
+						let headers = [];
+						let datatypes = [];
+						let validations = [];
+						for (let r = 0; r < hrow.length; r++){
+							let row = {};
+							row.header = hrow[r].formattedValue;
+							row.datatype = drow[r].userEnteredFormat.numberFormat;
+							row.validation = drow[r].dataValidation;
+							databases.pages[i].rows.push(row);
+						}
+					}
+					
+					// remove any old instances of the database id
+					for (let i = 0; i < databases.length; i++){
+						if (databases[i].id == id){
+							databases.splice(i,1);
+							i--;
+						}
+					}
+					// add the new database version
+					databases.push(database);
+					methods.log('Successfully reloaded database '+id+'.');
+					resolve(database);
+				});
 			});
 		});
 	};
