@@ -149,7 +149,7 @@ At any point you can get the last copy of this array using `GVZ.getDatabases()`.
 You can also get the information of a singular database using `getDatabase(id)`.
 You can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
 
-To limit the databases the user can choose from, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`.
+To limit the databases the user can choose from, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`. Of course, there is also a `GVZ.getFlair()` if you need it.
 When a flair is set, any databases created with the library will be given the name `[FLAIR] My Database` and `GVZ.reloadDatabases()` will only load databases with `[FLAIR]` in their name.
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
 

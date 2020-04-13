@@ -17,30 +17,6 @@ var GVZ = (function() {
 	/// USER VARIABLES
 	var authStatusListener = function(newStatus){};
 	
-	/* var databases = 
-	(Array)[
-		(DatabaseObject){
-			"name": "SHEET NAME",
-			"id": "SHEET ID",
-			"pages": (Array)[
-				(PageObject){
-					"name": "PAGE NAME",
-					"id": "PAGE ID"
-					"rows": (Array)[
-						(RowObject){
-							"header": "ROW HEADER",
-							"datatype": "DATATYPE",
-							"validation": "FOR NUMS AND BOOLS"
-						}
-					]
-				},
-				...
-			]
-		},
-		...
-	]
-	*/
-	
 	/// *******************
 	/// * LOGGING METHODS *
 	/// *******************
@@ -72,7 +48,7 @@ var GVZ = (function() {
 	/// LOADS THE GOOGLEAUTH VARIABLE
 	methods.initialize = function(apiKey,clientId,keepAuth){
 		checkReqs();
-		keepAuth = (keepAuth === false);
+		keepAuth = !(keepAuth === false);
 		// Call gapi load function
 		gapi.load('client:auth2', function(){
 			// Then initialize its client
@@ -268,9 +244,19 @@ var GVZ = (function() {
 		
 	};
 	
-	/// SETS DATBASE IDENTIFIER
+	/// CREATES A DATABASE FROM DATABASE OBJECT
+	methods.generateDatabase = function(object){
+		
+	};
+	
+	/// SETS DATABASE IDENTIFIER
 	methods.setFlair = function(string){
 		flair = ""+string;
+	};
+	
+	/// GETS DATABASE IDENTIFIER
+	methods.getFlair = function(){
+		return flair;
 	};
 	
 	/// CLEARS DATABASE IDENTIFIER
