@@ -123,19 +123,8 @@ GVZ.getDatabases() = [
                     v (row object)
                     |___.header = string
                     |___.datatype = v (datatype object)
-                    |               |___.type = string
-                    |               |___.pattern = string
-                    |               
-                    |___.validation = v (validation object)
-                                      |___.strict = boolean
-                                      |___.condition = v (condition object)
-                                                       |___.type = string
-                                                       |___.values = [
-                                                               v (value object)
-                                                               |___.userEnteredValue = string
-                                                               
-                                                               > (value object)...
-                                                            ]
+                                    |___.type = string
+                                    |___.pattern = string
                    > (row object)...
                 ]
            > (page object)...

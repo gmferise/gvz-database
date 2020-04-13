@@ -207,11 +207,11 @@ var GVZ = (function() {
 						}
 						// add the new database version
 						databases.push(database);
-						methods.log('Successfully reloaded database "'+id+'".');
+						methods.log('Successfully reloaded database "'+id+'"');
 						resolve(database);
 					}
 					catch (e) {
-						methods.log('Skipping database "'+id+'" due to parsing issues.');
+						methods.log('Failed to reload database "'+id+'"');
 						reject();
 					}
 				});
