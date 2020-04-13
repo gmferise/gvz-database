@@ -116,7 +116,10 @@ var GVZ = (function() {
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
-			if (flair != "") { params += "and name contains '["+flair+"]'"; }
+			if (flair != "") {
+				params += "and name contains '["+flair+"]'";
+				GVZ.log('Using flair '+flair);
+			}
 			// get sheet listing
 			gapi.client.drive.files.list({
 				q: params,
@@ -124,14 +127,21 @@ var GVZ = (function() {
 				// clear databases and reload each new one
 				let newDatabases = response.result.files;
 				databases = [];
+				let requiredSuccesses = newDatabases.length;
 				for (let i = 0; i < newDatabases.length; i++){
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
 						// after every reload check to see if we did them all
-						if (databases.length >= newDatabases.length){ 
+						if (databases.length >= requiredSuccesses){ 
 							methods.log('Successfully reloaded all databases.');
 							resolve(databases);
 						}
-					});
+					}).catch(function(){ // if any reject then ignore them
+						requiredSuccesses--;
+						if (databases.length >= requiredSuccesses){ 
+							methods.log('Successfully reloaded all databases.');
+							resolve(databases);
+						}
+					};
 				}
 			});
 		});
@@ -170,36 +180,40 @@ var GVZ = (function() {
 					ranges: ranges,
 					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
 				}).then(function(response){
-					// finish building the pages
-					for (let i = 0; i < response.result.sheets.length; i++){
-						let hrow = response.result.sheets[i].data[0].rowData[0].values;
-						let drow = response.result.sheets[i].data[0].rowData[1].values;
-						let headers = [];
-						let datatypes = [];
-						let validations = [];
-						for (let r = 0; r < hrow.length; r++){
-							let row = {};
-							try { row.header = hrow[r].formattedValue; }
-							catch (e) { row.header = ""; }
-							try { row.datatype = drow[r].userEnteredFormat.numberFormat; }
-							catch (e) { row.datatype = undefined; }
-							try { row.validation = drow[r].dataValidation; }
-							catch (e) { row.validation = undefined; }
-							database.pages[i].rows.push(row);
+					try { // potential parsing errors, reject if any happen
+						// finish building the pages
+						for (let i = 0; i < response.result.sheets.length; i++){
+							let hrow = response.result.sheets[i].data[0].rowData[0].values;
+							let drow = response.result.sheets[i].data[0].rowData[1].values;
+						
+							for (let r = 0; r < hrow.length; r++){
+								let row = {};
+								try { row.header = hrow[r].formattedValue; }
+								catch (e) { row.header = ""; }
+								try { row.datatype = drow[r].userEnteredFormat.numberFormat; }
+								catch (e) { row.datatype = undefined; }
+								try { row.validation = drow[r].dataValidation; }
+								catch (e) { row.validation = undefined; }
+								database.pages[i].rows.push(row);
+							}
 						}
-					}
-					
-					// remove any old instances of the database id
-					for (let i = 0; i < databases.length; i++){
-						if (databases[i].id == id){
-							databases.splice(i,1);
-							i--;
+						
+						// remove any old instances of the database id
+						for (let i = 0; i < databases.length; i++){
+							if (databases[i].id == id){
+								databases.splice(i,1);
+								i--;
+							}
 						}
+						// add the new database version
+						databases.push(database);
+						methods.log('Successfully reloaded database "'+id+'".');
+						resolve(database);
 					}
-					// add the new database version
-					databases.push(database);
-					methods.log('Successfully reloaded database "'+id+'".');
-					resolve(database);
+					catch (e) {
+						methods.log('Failed to reload database "'+id+'".');
+						reject();
+					}
 				});
 			});
 		});

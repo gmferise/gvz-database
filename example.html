@@ -20,9 +20,6 @@
 		<script>
 			GVZ.setLogging(true);
 			function authChanged(newStatus){
-				// Log the new auth status
-				GVZ.log("Auth status changed: "+newStatus);
-				
 				// Update button text
 				let b = document.getElementById('auth-button');
 				if (newStatus){
