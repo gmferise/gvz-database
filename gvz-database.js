@@ -132,13 +132,13 @@ var GVZ = (function() {
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
 						// after every reload check to see if we did them all
 						if (databases.length >= requiredSuccesses){ 
-							methods.log('Successfully reloaded all databases.');
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
 							resolve(databases);
 						}
 					}).catch(function(){ // if any reject then ignore them
 						requiredSuccesses--;
 						if (databases.length >= requiredSuccesses){ 
-							methods.log('Successfully reloaded all databases.');
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
 							resolve(databases);
 						}
 					});
@@ -211,7 +211,7 @@ var GVZ = (function() {
 						resolve(database);
 					}
 					catch (e) {
-						methods.log('Failed to reload database "'+id+'".');
+						methods.log('Skipping database "'+id+'" due to parsing issues.');
 						reject();
 					}
 				});
