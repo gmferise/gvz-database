@@ -139,7 +139,7 @@ var GVZ = (function() {
 	
 	/// RELOADS ALL INFO ON A DATABASE
 	methods.reloadDatabase = function(id){
-		methods.log('Reloading database '+id+'...');
+		methods.log('Reloading database "'+id+'"...');
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			// get spreadsheet name, id, and pages
@@ -198,7 +198,7 @@ var GVZ = (function() {
 					}
 					// add the new database version
 					databases.push(database);
-					methods.log('Successfully reloaded database '+id+'.');
+					methods.log('Successfully reloaded database "'+id+'".');
 					resolve(database);
 				});
 			});
