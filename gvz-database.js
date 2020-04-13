@@ -141,7 +141,7 @@ var GVZ = (function() {
 							methods.log('Successfully reloaded all databases.');
 							resolve(databases);
 						}
-					};
+					});
 				}
 			});
 		});
