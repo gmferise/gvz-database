@@ -12,10 +12,104 @@ var GVZ = (function() {
 		if (typeof(GoogleAuth) === undefined) { methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
 		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
 	};
+	var authStatusListener = function(newStatus){};
+	var rowTypes = {
+		"str": function(){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TEXT",
+							"pattern": ""
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			}
+		},
+		"num": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"unum": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					},
+					"dataValidation": {
+						"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
+						"strict": true
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat,dataValidation"
+			};
+		},
+		"date": function(format){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE",
+							"pattern": format
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"time": function(format){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": format
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"datetime": function(format){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE_TIME",
+							"pattern": format
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"bool": function(){
+			return {
+				"cell": {
+					"dataValidation": {
+						"condition": { "type": "BOOLEAN" },
+						"strict": true
+					}
+				},
+				"fields": "dataValidation"
+			};
+		}
+	};
 	var GoogleAuth;
 	
-	/// USER VARIABLES
-	var authStatusListener = function(newStatus){};
 	
 	/// *******************
 	/// * LOGGING METHODS *
