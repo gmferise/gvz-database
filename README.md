@@ -2,7 +2,23 @@
 A more friendly interface for using Google Sheets as a database.
 It essentially extends the functionality of the google.visualizations.Query() API call into a better query language.
 
-# Documentation
+# Documentation Contents
+
+* [Setup](#setup)
+    * [Google Developer Console Config](#google-developer-console-config) 
+    * [Initializing the Library](#initializing-the-library)
+* [Library Objects](#library-objects)
+    * [Databases](#databases)
+    * [Tables](#tables)
+    * [Columns](#columns)
+    * [Datatypes](#datatypes)
+* [Library Methods](#library-methods)
+    * [Logging and Errors](#logging-and-errors)
+	* [Handling Auth Status](#handling-auth-status)
+	* [Auth Status Listener](#auth-status-listener)
+	* [Creating Databases](#creating-databases)
+	* [Loading Databases](#loading-databases)
+	* [Querying Databases](#querying-databases)
 
 ## Setup
 
@@ -87,18 +103,20 @@ column = {
 ```
 
 ### Datatypes
-The GVZ library allows for a simpler use of datatypes 
+The GVZ library allows for a simpler use of datatypes.
 This represents the structure of the datatype object, usually found in the `datatype` property of a column object.
 ```yaml
 datatype = {
     type: ""
-    format: ""
+    decimals: 0
 }
 ```
+The available datatypes are `string`, `number`, `unumber`, `duration`, `time`, `date`, `datetime`, and `boolean`.
+The decimals parameter is only used for `number` and `unumber` to define the number of decimal places to show
 
 ## Library Methods
 
-### GVZ Console Logging
+### Logging and Errors
 The GVZ library comes with it's own logging feature.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
 Logging is disabled by default since it's intended for debugging. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
