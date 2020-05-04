@@ -56,48 +56,44 @@ function loadGVZ(){
 The GVZ library turns spreadsheets into a cleaner database object to be used in queries.
 The recommended way to access a database object is by its id using `GVZ.getDatabase(id)`, although you can also index the array returned by `GVZ.getDatabases()`.
 The id of a database is the same as the spreadsheet id found in the URL of a spreadsheet.
-This tree represents the structure of the array and database objects returned by `GVZ.getDatabases()`.
-```scss
-GVZ.getDatabases() = [
-    v (database object)
-    |___.name = string
-    |___.id = string
-    |___.tables = [
-           > (table object)...
-        ]
-   > (database object)...
-]
+This represents the structure of the database object.
+```yaml
+database = {
+    name: ""
+    id: ""
+    tables: []
+}
 ```
 
 ### Tables
 The GVZ library turns pages of a spreadsheet into a cleaner table object to be used in queries.
-This tree represents the structure of the table object, usually found in an array assigned to a database object's `tables` property.
-```scss
-v (table object)
-|___.name = string
-|___.id = string
-|___.columns = [
-       > (column object)...
-	]
-]
+This represents the structure of the table object, usually found in an array assigned to a database object's `tables` property.
+```yaml
+table = {
+    name: ""
+    id: ""
+    columns: []
+}
 ```
 
 ### Columns
 The GVZ library turns each column of a spreadsheet into datatyped and headed columns for data storage.
-This tree represents the structure of the column object, usually found in an array assigned to a table object's `columns` property.
-```scss
-v (column object)
-|___.header = string
-|___.datatype = > (datatype object)
+This represents the structure of the column object, usually found in an array assigned to a table object's `columns` property.
+```yaml
+column = {
+    header: ""
+    datatype: {}
+}
 ```
 
 ### Datatypes
 The GVZ library allows for a simpler use of datatypes 
-This tree represents the structure of the datatype object, usually found in the `datatype` property of a column object.
-```scss
-v (datatype object)
-|___.type = string
-|___.format = string
+This represents the structure of the datatype object, usually found in the `datatype` property of a column object.
+```yaml
+datatype = {
+    type: ""
+    format: ""
+}
 ```
 
 ## Library Methods
