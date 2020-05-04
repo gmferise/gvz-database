@@ -1,6 +1,7 @@
 # Documentation Contents
 
 * [Setup](#setup)
+    * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
     * [Initializing the Library](#initializing-the-library)
 * [Library Objects](#library-objects)
@@ -17,6 +18,9 @@
 	* [Querying Databases](#querying-databases)
 
 ## Setup
+
+### Installation
+Download the latest version of `gvz-database.js` from the releases tab and put it in your project folder.
 
 ### Google Developer Console Config
 Before you can use this library, you should make a [Google API Project](https://console.developers.google.com/).
