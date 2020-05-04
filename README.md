@@ -1,7 +1,3 @@
-# gvz-database
-A more friendly interface for using Google Sheets as a database.
-It essentially extends the functionality of the google.visualizations.Query() API call into a better query language.
-
 # Documentation Contents
 
 * [Setup](#setup)
