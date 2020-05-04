@@ -233,7 +233,7 @@ var GVZ = (function() {
 				if (flair != ""){
 					methods.log("Filtering by flair '["+flair+"]'");
 					for (let i = 0; i < newDatabases.length; i++){
-						if (newDatabases[i].name.substring(0, flair.length) != '['+flair+']'){
+						if (newDatabases[i].name.substring(0, ('['+flair+']').length) != '['+flair+']'){
 							methods.log("Filtered out database '"+newDatabases[i].name+"'");
 							newDatabases.splice(i,1);
 							i--;
