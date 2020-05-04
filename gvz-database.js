@@ -108,7 +108,7 @@ var GVZ = (function() {
 				},
 				"fields": "userEnteredFormat.numberFormat"
 			};
-		}
+		},
 		"boolean": function(){
 			return {
 				"cell": {
