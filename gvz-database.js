@@ -3,7 +3,7 @@ var GVZ = (function() {
 	
 	/// LIBRARY VARIABLES
 	var methods = {};
-	var internal = {};
+	var dmethods = {};
 	var databases = [];
 	var logging = false;
 	var flair = "";
@@ -13,8 +13,8 @@ var GVZ = (function() {
 		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
 	};
 	var authStatusListener = function(newStatus){};
-	var rowTypes = {
-		"str": function(){
+	var datatypes = {
+		"string": function(){
 			return {
 				"cell": {
 					"userEnteredFormat": {
@@ -27,7 +27,7 @@ var GVZ = (function() {
 				"fields": "userEnteredFormat.numberFormat"
 			}
 		},
-		"num": function(decimalPlaces){
+		"number": function(decimalPlaces){
 			return {
 				"cell": {
 					"userEnteredFormat": {
@@ -40,7 +40,7 @@ var GVZ = (function() {
 				"fields": "userEnteredFormat.numberFormat"
 			};
 		},
-		"unum": function(decimalPlaces){
+		"unumber": function(decimalPlaces){
 			return {
 				"cell": {
 					"userEnteredFormat": {
@@ -57,46 +57,59 @@ var GVZ = (function() {
 				"fields": "userEnteredFormat.numberFormat,dataValidation"
 			};
 		},
-		"date": function(format){
+		"date": function(){
 			return {
 				"cell": {
 					"userEnteredFormat": {
 						"numberFormat": {
 							"type": "DATE",
-							"pattern": format
+							"pattern": "yyyy-mm-dd"
 						}
 					}
 				},
 				"fields": "userEnteredFormat.numberFormat"
 			};
 		},
-		"time": function(format){
+		"time": function(){
 			return {
 				"cell": {
 					"userEnteredFormat": {
 						"numberFormat": {
 							"type": "TIME",
-							"pattern": format
+							"pattern": "hh:mm:ss.000"
 						}
 					}
 				},
 				"fields": "userEnteredFormat.numberFormat"
 			};
 		},
-		"datetime": function(format){
+		"datetime": function(){
 			return {
 				"cell": {
 					"userEnteredFormat": {
 						"numberFormat": {
 							"type": "DATE_TIME",
-							"pattern": format
+							"pattern": "yyyy-mm-dd hh:mm:ss.000"
 						}
 					}
 				},
 				"fields": "userEnteredFormat.numberFormat"
 			};
 		},
-		"bool": function(){
+		"duration": function(){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": "[hh]:[mm]:[ss].000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		}
+		"boolean": function(){
 			return {
 				"cell": {
 					"dataValidation": {
@@ -200,9 +213,9 @@ var GVZ = (function() {
 		authStatusListener = function(newStatus){};
 	};
 
-	/// ********************
-	/// * DATABASE METHODS *
-	/// ********************
+	/// *****************************
+	/// * DATABASE HANDLING METHODS *
+	/// *****************************
 	
 	/// LOADS DATABASES FROM USER'S DRIVE
 	methods.reloadDatabases = function(){
@@ -210,16 +223,25 @@ var GVZ = (function() {
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
-			if (flair != "") {
-				params += "and name contains '["+flair+"]'";
-				GVZ.log('Using flair '+flair);
-			}
 			// get sheet listing
 			gapi.client.drive.files.list({
 				q: params,
 			}).then(function(response) {
-				// clear databases and reload each new one
 				let newDatabases = response.result.files;
+				
+				// filter recieved databases if necessary
+				if (flair != ""){
+					methods.log("Filtering by flair '["+flair+"]'");
+					for (let i = 0; i < newDatabases.length; i++){
+						if (newDatabases[i].name.substring(0, flair.length) != flair){
+							methods.log("Filtered out database '"+newDatabases[i].name+"'");
+							newDatabases.splice(i,1);
+							i--;
+						}
+					}
+				}
+				
+				// clear databases array and reload each new one
 				databases = [];
 				let requiredSuccesses = newDatabases.length;
 				for (let i = 0; i < newDatabases.length; i++){
@@ -250,21 +272,24 @@ var GVZ = (function() {
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
 			}).then(function(response){				
-				// create new database object
-				var database = {};
+				// create new database object from base methods
+				var database = Object.create(dmethods);
 				database.name = response.result.properties.title;
 				database.id = id;
-				database.pages = [];
+				methods.log(database.id+': '+database.name);
+				database.tables = [];
+				
+				
+				// start building the pages
 				let sheets = response.result.sheets; // response's pages
 				let ranges = [];
 				
-				// start building the pages
 				for (let i = 0; i < sheets.length; i++){
-					let page = {};
-					page.name = sheets[i].properties.title;
-					page.id = sheets[i].properties.sheetId;
-					page.rows = [];
-					database.pages.push(page);
+					let table = {};
+					table.name = sheets[i].properties.title;
+					table.id = sheets[i].properties.sheetId;
+					table.columns = [];
+					database.tables.push(table);
 					ranges.push(sheets[i].properties.title+'!1:2');
 				}
 				
@@ -281,14 +306,14 @@ var GVZ = (function() {
 							let drow = response.result.sheets[i].data[0].rowData[1].values;
 						
 							for (let r = 0; r < hrow.length; r++){
-								let row = {};
-								try { row.header = hrow[r].formattedValue; }
-								catch (e) { row.header = ""; }
-								try { row.datatype = drow[r].userEnteredFormat.numberFormat; }
-								catch (e) { row.datatype = undefined; }
-								try { row.validation = drow[r].dataValidation; }
-								catch (e) { row.validation = undefined; }
-								database.pages[i].rows.push(row);
+								let col = {};
+								try { col.header = hrow[r].formattedValue; }
+								catch (e) { col.header = ""; }
+								try { col.datatype = drow[r].userEnteredFormat.numberFormat; }
+								catch (e) { col.datatype = undefined; }
+								try { col.validation = drow[r].dataValidation; }
+								catch (e) { col.validation = undefined; }
+								database.tables[i].columns.push(col);
 							}
 						}
 						
@@ -338,17 +363,8 @@ var GVZ = (function() {
 		return false;
 	};
 	
-	/// RETURNS WHETHER A PAGE ID IS VALID ON A DATABASE
-	methods.isPage = function(database,page){
-		let pages = methods.getDatabase(database).pages;
-		for (let i = 0; i < pages.length; i++){
-			if (page == pages[i].id) { return true; }
-		}
-		return false;
-	}
-	
 	/// CREATES A DATABASE
-	methods.createDatabase = function(name,pages){
+	methods.createDatabase = function(name, tables){
 		
 	};
 	
@@ -372,17 +388,31 @@ var GVZ = (function() {
 		flair = "";
 	};
 	
+	/// ***************************
+	/// * DATABASE OBJECT METHODS *
+	/// ***************************
+
+	/// RETURNS WHETHER A DATABASE HAS THE PAGE ID
+	dmethods.hasTable = function(table){
+		for (let i = 0; i < this.tables.length; i++){
+			if (table == this.tables[i].id) { return true; }
+		}
+		return false;
+	}
+	
+	
+	
 	/// *****************
 	/// * QUERY METHODS *
 	/// *****************
 	
 	/// MAIN QUERY FUNCTION
-	methods.query = function(database,page,string){
+	methods.query = function(database, table, string){
 		checkReqs(true);		
 		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
 		// Ensure database is valid
 		if (!methods.isDatabase(database)) { methods.err('Unknown Database ID "'+database+'"'); }
-		if (!methods.isPage(database,page)) { methods.err('Unknown Page ID "'+page+'"'); }
+		if (!methods.isTable(database,table)) { methods.err('Unknown Table ID "'+table+'"'); }
 		
 		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
 		// remove any "" caused by leading/trailing whitespace

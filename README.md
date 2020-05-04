@@ -2,7 +2,9 @@
 A more friendly interface for using Google Sheets as a database.
 It essentially extends the functionality of the google.visualizations.Query() API call into a better query language.
 
-## Documentation
+# Documentation
+
+## Setup
 
 ### Google Developer Console Config
 Before you can use this library, you should make a [Google API Project](https://console.developers.google.com/).
@@ -11,30 +13,6 @@ You will also need to:
 * Enable the `/auth/drive.metadata.readonly`, `/auth/spreadsheets`, and `/auth/drive.file` scopes in your OAuth Consent Screen.
 * Make a Client ID with its JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
 * Make an API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
-
-
-### GVZ Console Logging
-The GVZ library comes with it's own logging feature.
-Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
-Logging is disabled by default since it's intended for debugging. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
-
-You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
-
-You can also use `GVZ.err(string)` within your own code to throw a GVZ Error if you'd like, although they cannot be disabled.
-
-
-**Example:**
-```javascript
-GVZ.log("This will not print to the console.");
-GVZ.setLogging(true);
-GVZ.log("This will print to the console.");
-GVZ.toggleLogging();
-GVZ.log("This will not print to the console.");
-GVZ.toggleLogging();
-GVZ.log("This will print to the console.");
-GVZ.setLogging(false);
-GVZ.log("This will not print to the console.");
-```
 
 ### Initializing the Library
 The GVZ library relies on multiple libraries and APIs.
@@ -71,6 +49,83 @@ function loadGVZ(){
 }
 ```
 
+## Library Objects
+
+
+### Databases
+The GVZ library turns spreadsheets into a cleaner database object to be used in queries.
+The recommended way to access a database object is by its id using `GVZ.getDatabase(id)`, although you can also index the array returned by `GVZ.getDatabases()`.
+The id of a database is the same as the spreadsheet id found in the URL of a spreadsheet.
+This tree represents the structure of the array and database objects returned by `GVZ.getDatabases()`.
+```scss
+GVZ.getDatabases() = [
+    v (database object)
+    |___.name = string
+    |___.id = string
+    |___.tables = [
+           > (table object)...
+        ]
+   > (database object)...
+]
+```
+
+### Tables
+The GVZ library turns pages of a spreadsheet into a cleaner table object to be used in queries.
+This tree represents the structure of the table object, usually found in an array assigned to a database object's `tables` property.
+```scss
+v (table object)
+|___.name = string
+|___.id = string
+|___.columns = [
+       > (column object)...
+	]
+]
+```
+
+### Columns
+The GVZ library turns each column of a spreadsheet into datatyped and headed columns for data storage.
+This tree represents the structure of the column object, usually found in an array assigned to a table object's `columns` property.
+```scss
+v (column object)
+|___.header = string
+|___.datatype = > (datatype object)
+```
+
+### Datatypes
+The GVZ library allows for a simpler use of datatypes 
+This tree represents the structure of the datatype object, usually found in the `datatype` property of a column object.
+```scss
+v (datatype object)
+|___.type = string
+|___.format = string
+```
+
+## Library Methods
+
+### GVZ Console Logging
+The GVZ library comes with it's own logging feature.
+Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
+Logging is disabled by default since it's intended for debugging. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
+
+You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
+
+You can also use `GVZ.err(string)` within your own code to throw a GVZ Error if you'd like, although they cannot be disabled.
+
+
+**Example:**
+```javascript
+GVZ.log("This will not print to the console.");
+GVZ.setLogging(true);
+GVZ.log("This will print to the console.");
+GVZ.toggleLogging();
+GVZ.log("This will not print to the console.");
+GVZ.toggleLogging();
+GVZ.log("This will print to the console.");
+GVZ.setLogging(false);
+GVZ.log("This will not print to the console.");
+```
+
+
 ### Handling Auth Status
 There are multiple functions that deal with the authentication status.
 
@@ -106,43 +161,14 @@ GVZ.setAuthListener(authChanged);
 ### Creating Databases
 Nothing yet...
 
-### Loading and Using Databases
-The GVZ library turns any spreadsheet into a database object which you can use to make queries and display information about the database to the user.
-Below is the format of what `GVZ.getDatabases()` returns. 
-
-```scss
-GVZ.getDatabases() = [
-    v (database object)
-    |___.name = string
-    |___.id = string
-    |___.pages = [
-            v (page object)
-            |___.name = string
-            |___.id = string
-            |___.rows = [
-                    v (row object)
-                    |___.header = string
-                    |___.datatype = v (datatype object)
-                                    |___.type = string
-                                    |___.pattern = string
-                   > (row object)...
-                ]
-           > (page object)...
-        ]
-   > (database object)...
-]
-```
-
+### Loading Databases
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
-At any point you can get the last copy of this array using `GVZ.getDatabases()`.
-You can also get the information of a singular database using `getDatabase(id)`.
-You can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
+At any point you can get the last updated copy of this array using `GVZ.getDatabases()` or just call `GVZ.reloadDatabases()` again if you want to ensure the array returned is up-to-date.
+You can also get the information of a singular database using `getDatabase(id)` and you can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
 
-To limit the databases the user can choose from, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`. Of course, there is also a `GVZ.getFlair()` if you need it.
-When a flair is set, any databases created with the library will be given the name `[FLAIR] My Database` and `GVZ.reloadDatabases()` will only load databases with `[FLAIR]` in their name.
+To limit the databases the library attempts to load, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`. Of course, there is also a `GVZ.getFlair()` if you need it.
+When a flair is set, any databases created with the library will be given the name `[Flair] My Database` and `GVZ.reloadDatabases()` will only load databases with `[Flair]` at the start of their name (case sensitive, strict match).
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
-
-To 'select' a database for use you just need to keep its ID to use when querying. For pages the same is true, however it is recommended that you keep track of their index instead and just do `database.pages[i].id` when the id is needed.
 
 **Function Usage**
 ```javascript
