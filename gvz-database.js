@@ -1,18 +1,16 @@
 var GVZ = (function() {
 	'use strict';
 	
-	/// LIBRARY VARIABLES
-	var methods = {};
-	var dmethods = {};
+	/// *********************
+	/// * PRIVATE VARIABLES *
+	/// *********************
 	var databases = [];
 	var logging = false;
 	var flair = "";
-	var checkReqs = function(requireAuth){
-		if (typeof(gapi) === undefined) { methods.err('gapi is undefined. Did the API load properly?'); }
-		if (typeof(GoogleAuth) === undefined) { methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
-		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
-	};
 	var authStatusListener = function(newStatus){};
+	var GoogleAuth;
+	
+	/// TODO: Rework into a class
 	var datatypes = {
 		"string": function(){
 			return {
@@ -121,41 +119,53 @@ var GVZ = (function() {
 			};
 		}
 	};
-	var GoogleAuth;
 	
 	
 	/// *******************
-	/// * LOGGING METHODS *
+	/// * PRIVATE METHODS *
 	/// *******************
 	
-	/// LIBRARY EXTRA LOGS
+	// Checks whether requirements for running a method are met
+	// Always requires gapi and GoogleAuth to be loaded
+	// requireAuth (optional) true requires user to be signed in with GoogleAuth
+	var checkReqs = function(requireAuth){
+		if (typeof(gapi) === undefined) { methods.err('gapi is undefined. Did the API load properly?'); }
+		if (typeof(GoogleAuth) === undefined) { methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
+		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
+	};
+	
+	/// ******************
+	/// * PUBLIC METHODS *
+	/// ******************
+	var methods = {};
+	
+	// All of library's log/debug statements
 	methods.log = function(string){
 		if (logging){ console.log(string); }
 	};
 	
-	/// SET LOGGING
+	// Control whether logging is on or off
 	methods.setLogging = function(bool){
 		logging = bool;
 	};
 	
-	/// TOGGLE LOGGING
+	// Toggle whether logging is on or off
 	methods.toggleLogging = function(bool){
 		logging = (!logging);
 	};
 	
-	/// LIBRARY ERRORS
+	// All of library's error messages, cannot be disabled
 	methods.err = function(string){
 		throw 'GVZ Error: '+string;
 	};
-		
-	/// ****************
-	/// * AUTH METHODS *
-	/// ****************
+
+	/// AUTH METHODS
 	
-	/// LOADS THE GOOGLEAUTH VARIABLE
+	/// ASYNC RETURN?
+	// Configures the GoogleAuth variable, creates a client for api requests
 	methods.initialize = function(apiKey,clientId,keepAuth){
 		checkReqs();
-		keepAuth = !(keepAuth === false);
+		keepAuth = !(keepAuth === false); // validation, allows undefined value
 		// Call gapi load function
 		gapi.load('client:auth2', function(){
 			// Then initialize its client
@@ -165,7 +175,7 @@ var GVZ = (function() {
 				"clientId":clientId,
 				"scope":"https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets"
 			}).then(function(){
-				// Then assign GoogleAuth and call the user's listener
+				// Then assign GoogleAuth and configure the listener callback pointer
 				GoogleAuth = gapi.auth2.getAuthInstance();
 				GoogleAuth.isSignedIn.listen(authStatusListener);
 				// Sign out unless told to do otherwise
@@ -175,32 +185,36 @@ var GVZ = (function() {
 		});
 	};
 	
-	/// TOGGLES AUTH STATUS AND TRIGGERS DIALOGUE OR SIGNS OUT
+	/// ASYNC RETURN?
+	// Toggles auth status, triggering sign-in popup or signing out
 	methods.toggleAuth = function(){
 		checkReqs();
-		if (GoogleAuth.isSignedIn.get()) { GoogleAuth.signOut(); }
-		else { GoogleAuth.signIn(); }
+		if (GoogleAuth.isSignedIn.get()) { return GoogleAuth.signOut(); }
+		else { return GoogleAuth.signIn(); }
 	};
 	
-	/// GETS CURRENT AUTH STATUS
+	// Returns current auth status
 	methods.getAuthStatus = function(){
 		checkReqs();
 		return GoogleAuth.isSignedIn.get();
 	};
 	
-	/// SIGNS IN 
+	/// ASYNC RETURN?
+	// Signs in, triggering sign-in popup
 	methods.signIn = function(){
 		checkReqs();
-		GoogleAuth.signIn();
+		return GoogleAuth.signIn();
 	};
 	
-	/// SIGNS OUT
+	/// ASYNC RETURN?
+	// Signs out
 	methods.signOut = function(){
 		checkReqs();
-		GoogleAuth.signOut();
+		return GoogleAuth.signOut();
 	};
 	
-	/// SETS THE LISTENER FOR CHANGE IN AUTH STATUS
+	// Sets listener for change in auth status
+	// Listener function is provided with new auth status
 	methods.setAuthListener = function(callback){
 		authStatusListener = function(){
 			checkReqs();
@@ -208,16 +222,15 @@ var GVZ = (function() {
 		};
 	};
 	
-	/// CLEARS THE LISTENER FOR CHANGE IN AUTH STATUS
+	// Clears listnener for change in auth status
 	methods.clearAuthListener = function(){
 		authStatusListener = function(newStatus){};
 	};
 
-	/// *****************************
-	/// * DATABASE HANDLING METHODS *
-	/// *****************************
+	/// DATABASE HANDLING METHODS
 	
-	/// LOADS DATABASES FROM USER'S DRIVE
+	/// ASYNC RETURN!
+	//Loads all databses from user's Google Drive
 	methods.reloadDatabases = function(){
 		methods.log('Reloading all databases...');
 		checkReqs(true);
@@ -263,7 +276,8 @@ var GVZ = (function() {
 		});
 	};
 	
-	/// RELOADS ALL INFO ON A DATABASE
+	/// ASYNC RETURN!
+	// Reloads all info on single database from user's Google Drive
 	methods.reloadDatabase = function(id){
 		methods.log('Reloading database "'+id+'"...');
 		checkReqs(true);
@@ -337,12 +351,12 @@ var GVZ = (function() {
 		});
 	};
 	
-	/// RETURNS DATABASES VARIABLE
+	// Returns databases variable 
 	methods.getDatabases = function(){
 		return databases;
 	};
 	
-	/// RETURNS INFO ON SINGLE DATABASE
+	// Returns info on single database given id
 	methods.getDatabase = function(id){
 		if (methods.isDatabase(id)){
 			for (let i = 0; i < databases.length; i++){
@@ -354,7 +368,7 @@ var GVZ = (function() {
 		}
 	};
 	
-	/// RETURNS WHETHER A DATABASE ID IS VALID
+	// Returns whether a database exists give its id
 	methods.isDatabase = function(id){
 		for (let i = 0; i < databases.length; i++){
 			if (id == databases[i].id) { return true; }
@@ -362,36 +376,22 @@ var GVZ = (function() {
 		return false;
 	};
 	
-	/// CREATES A DATABASE
-	methods.createDatabase = function(name, tables){
-		
-	};
-	
-	/// CREATES A DATABASE FROM DATABASE OBJECT
-	methods.generateDatabase = function(object){
-		
-	};
-	
-	/// SETS DATABASE IDENTIFIER
+	// Sets database identifier flair
 	methods.setFlair = function(string){
 		flair = ""+string;
 	};
 	
-	/// GETS DATABASE IDENTIFIER
+	// Gets database identifier flair
 	methods.getFlair = function(){
 		return flair;
 	};
 	
-	/// CLEARS DATABASE IDENTIFIER
+	// Clears database identifier flair
 	methods.clearFlair = function(){
 		flair = "";
 	};
 	
-	/// ***************************
-	/// * DATABASE OBJECT METHODS *
-	/// ***************************
-
-	/// RETURNS WHETHER A DATABASE HAS THE PAGE ID
+	/// TODO: Put this in a class
 	dmethods.hasTable = function(table){
 		for (let i = 0; i < this.tables.length; i++){
 			if (table == this.tables[i].id) { return true; }
@@ -399,13 +399,10 @@ var GVZ = (function() {
 		return false;
 	}
 	
+	/// QUERY METHODS
 	
-	
-	/// *****************
-	/// * QUERY METHODS *
-	/// *****************
-	
-	/// MAIN QUERY FUNCTION
+	/// ASYNC RETURN!
+	// Main query function
 	methods.query = function(database, table, string){
 		checkReqs(true);		
 		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
@@ -432,7 +429,7 @@ var GVZ = (function() {
 		}
 	};
 	
-	/// EXPOSE METHODS TO USER
+	/// EXPOSE PUBLIC METHODS TO USER
 	return methods;
 	
 })();
