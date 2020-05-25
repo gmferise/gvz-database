@@ -287,7 +287,7 @@ var GVZ = (function() {
 				spreadsheetId: id
 			}).then(function(response){				
 				// create new database object from base methods
-				var database = Object.create(dmethods);
+				var database = Object.create(); /// TODO: Use constructor
 				database.name = response.result.properties.title;
 				database.id = id;
 				methods.log(database.id+': '+database.name);
@@ -392,12 +392,14 @@ var GVZ = (function() {
 	};
 	
 	/// TODO: Put this in a class
-	dmethods.hasTable = function(table){
+	/*
+	methods.hasTable = function(table){
 		for (let i = 0; i < this.tables.length; i++){
 			if (table == this.tables[i].id) { return true; }
 		}
 		return false;
 	}
+	*/
 	
 	/// QUERY METHODS
 	
