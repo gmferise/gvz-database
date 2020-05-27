@@ -125,7 +125,7 @@ var GVZ = (function() {
 	// Returns info about the authenticated user, or undefined
 	methods.getUserInfo = function(){
 		checkReqs();
-		if (GoogleAuth.getAuthStatus()){
+		if (GoogleAuth.isSignedIn.get()){
 			let profile = GoogleAuth.currentUser.get().getBasicProfile();
 			return {
 				firstName: profile.getGivenName(),
