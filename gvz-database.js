@@ -387,10 +387,12 @@ var GVZ = (function() {
 		}
 	}
 	
+	/*
 	// Used to compare sheets output to library datatyping
 	equals(other){
 		return (JSON.stringify(this.toJSON()) === JSON.stringify(other))
 	}
+	*/
 	
 	class Datatype {
 		constructor(type, decimals){
