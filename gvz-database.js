@@ -224,11 +224,14 @@ var GVZ = (function() {
 							let hrow = response.result.sheets[i].data[0].rowData[0].values;
 							let drow = response.result.sheets[i].data[0].rowData[1].values;
 						
-							for (let r = 0; r < hrow.length; r++){
+							for (let c = 0; c < hrow.length; c++){
 								let col = new Column();
-								try { col.header = hrow[r].formattedValue; }
+								try { col.header = hrow[c].formattedValue; }
 								catch (e) { col.header = ""; }
-								col.datatype = methods.JSONtoDatatype(drow[r]);
+								col.datatype = methods.JSONtoDatatype(drow[c]);
+								if (col.datatype === undefined){
+									methods.err('Could not determine datatype for column '+c+' ('+col.header+')');
+								}
 								database.tables[i].pushColumn(col);
 							}
 						}
@@ -246,6 +249,7 @@ var GVZ = (function() {
 						resolve(database);
 					}
 					catch (e) {
+						throw e;
 						methods.log('Failed to reload database "'+id+'"');
 						reject();
 					}
@@ -304,23 +308,25 @@ var GVZ = (function() {
 	}
 	*/
 	
+	// Messy function for a messy format
 	methods.JSONtoDatatype = function(json){
 		for (type in datatypes){
 			let format = datatypes[type]().cell;
-			if (
-				type !== "boolean"
-				&&
-				format.userEnteredFormat.numberFormat.type === json.userEnteredFormat.numberFormat.type
-				&&
-				JSON.stringify(format.dataValidation) === JSON.stringify(json.dataValidation)
-			){
-				if (json.userEnteredFormat.numberFormat.pattern !== undefined && (type === "number" || type === "unumber")){
-					return new Datatype(type, json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
+			try {
+				format.userEnteredFormat.numberFormat.pattern = "";
+				json.userEnteredFormat.numberFormat.pattern = "";
+			}
+			catch (e) {}
+			if (JSON.stringify(format) === JSON.stringify(json)){
+				if (type === "number" || type === "unumber"){
+					return new Datatype(type,
+					// Converts pattern to number of decimals
+					json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
 				}
 				else { return new Datatype(type); }
 			}
 		}
-		return new Datatype("string");
+		return undefined;
 	};
 	
 	/// ***********
