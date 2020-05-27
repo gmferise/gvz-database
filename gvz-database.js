@@ -306,7 +306,7 @@ var GVZ = (function() {
 	
 	methods.JSONtoDatatype = function(json){
 		for (type in datatypes){
-			let format = datatypes[type].cell;
+			let format = datatypes[type]().cell;
 			if (format.userEnteredFormat.numberFormat.type === json.userEnteredFormat.numberFormat.type
 				&&
 				JSON.stringify(format.dataValidation) === JSON.stringify(json.dataValidation)){
