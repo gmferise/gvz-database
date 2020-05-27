@@ -3,7 +3,6 @@
 	<head>
 		<title>Example Implementation</title>
 		<!-- First, load in the necessary Google libraries and APIs -->
-		
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="https://www.gstatic.com/charts/loader.js"></script>
 		<script> google.charts.load('current'); </script>
@@ -18,23 +17,19 @@
 		
 		<!-- Create a listener for whenever the user's auth status changes. -->
 		<script>
-			GVZ.setLogging(true);
-			function authChanged(newStatus){
-				// Update button text
-				let b = document.getElementById('auth-button');
-				if (newStatus){
-					b.innerHTML = "Sign Out";
-				}
-				else {
-					b.innerHTML = "Sign In";
-				}
+			GVZ.setLogging(true); // off by default, useful for debugging
+			// Create the event callback and assign it
+			function authChanged(newStatus){ // Updates the UI to reflect new status
+				document.getElementById('auth-status').innerHTML = newStatus ? "Welcome, "+GVZ.getUserInfo().firstName+"! You are currently signed in." : "You are currently signed out. Please sign in!";
+				document.getElementById('auth-button').innerHTML = newStatus ? "Sign Out" : "Sign In";
 			}
-			GVZ.setAuthListener(authChanged); // Tell the GVZ library to use the listener function
+			GVZ.setAuthListener(authChanged);
 		</script>
 	</head>
 	
 	<body>
-	<!-- Make the button we told the listener to change the text on -->
+	<!-- Make the button and text we told the listener to change -->
+	<div id="auth-status">You are currently signed out. Please sign in!</div>
 	<button id="auth-button" onclick="GVZ.toggleAuth()">Sign In</button>
 	</body>
 </html>

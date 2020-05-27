@@ -9,118 +9,7 @@ var GVZ = (function() {
 	var flair = "";
 	var authStatusListener = function(newStatus){};
 	var GoogleAuth;
-	
-	/// TODO: Rework into a class
-	var datatypes = {
-		"string": function(){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TEXT",
-							"pattern": ""
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			}
-		},
-		"number": function(decimalPlaces){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "NUMBER",
-							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"unumber": function(decimalPlaces){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "NUMBER",
-							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-						}
-					},
-					"dataValidation": {
-						"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
-						"strict": true
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat,dataValidation"
-			};
-		},
-		"date": function(){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "DATE",
-							"pattern": "yyyy-mm-dd"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"time": function(){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TIME",
-							"pattern": "hh:mm:ss.000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"datetime": function(){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "DATE_TIME",
-							"pattern": "yyyy-mm-dd hh:mm:ss.000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"duration": function(){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TIME",
-							"pattern": "[hh]:[mm]:[ss].000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"boolean": function(){
-			return {
-				"cell": {
-					"dataValidation": {
-						"condition": { "type": "BOOLEAN" },
-						"strict": true
-					}
-				},
-				"fields": "dataValidation"
-			};
-		}
-	};
-	
-	
+		
 	/// *******************
 	/// * PRIVATE METHODS *
 	/// *******************
@@ -161,31 +50,37 @@ var GVZ = (function() {
 
 	/// AUTH METHODS
 	
-	/// ASYNC RETURN?
+	// ASYNC RETURN!
 	// Configures the GoogleAuth variable, creates a client for api requests
 	methods.initialize = function(apiKey,clientId,keepAuth){
 		checkReqs();
 		keepAuth = !(keepAuth === false); // validation, allows undefined value
-		// Call gapi load function
-		gapi.load('client:auth2', function(){
-			// Then initialize its client
-			gapi.client.init({ // Initialize a client with these properties
-				"apiKey":apiKey,
-				"discoveryDocs":["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest","https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"],
-				"clientId":clientId,
-				"scope":"https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets"
-			}).then(function(){
-				// Then assign GoogleAuth and configure the listener callback pointer
-				GoogleAuth = gapi.auth2.getAuthInstance();
-				GoogleAuth.isSignedIn.listen(authStatusListener);
-				// Sign out unless told to do otherwise
-				if (!keepAuth){ GoogleAuth.signOut(); }
-				else { authStatusListener(); }
+		return new Promise(function(resolve,reject){
+			// Call gapi load function
+			gapi.load('client:auth2', function(){
+				// Then initialize its client
+				gapi.client.init({ // Initialize a client with these properties
+					"apiKey":apiKey,
+					"discoveryDocs":["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest","https://www.googleapis.com/discovery/v1/apis/sheets/v4/rest"],
+					"clientId":clientId,
+					"scope":"https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets"
+				}).then(function(){
+					// Then assign GoogleAuth and configure the listener callback pointer
+					GoogleAuth = gapi.auth2.getAuthInstance();
+					GoogleAuth.isSignedIn.listen(authStatusListener);
+					// Sign out unless told to do otherwise
+					if (!keepAuth){ GoogleAuth.signOut(); }
+					else { authStatusListener(); }
+					resolve();
+				},
+				function(response){
+					reject(response.error);
+				});
 			});
 		});
 	};
 	
-	/// ASYNC RETURN?
+	// ASYNC RETURN!
 	// Toggles auth status, triggering sign-in popup or signing out
 	methods.toggleAuth = function(){
 		checkReqs();
@@ -199,14 +94,14 @@ var GVZ = (function() {
 		return GoogleAuth.isSignedIn.get();
 	};
 	
-	/// ASYNC RETURN?
+	// ASYNC RETURN!
 	// Signs in, triggering sign-in popup
 	methods.signIn = function(){
 		checkReqs();
 		return GoogleAuth.signIn();
 	};
 	
-	/// ASYNC RETURN?
+	// ASYNC RETURN!
 	// Signs out
 	methods.signOut = function(){
 		checkReqs();
@@ -227,9 +122,26 @@ var GVZ = (function() {
 		authStatusListener = function(newStatus){};
 	};
 
+	// Returns info about the authenticated user, or undefined
+	methods.getUserInfo = function(){
+		checkReqs();
+		if (GoogleAuth.getAuthStatus()){
+			let profile = GoogleAuth.currentUser.get().getBasicProfile();
+			return {
+				firstName: profile.getGivenName(),
+				lastName: profile.getFamilyName(),
+				email: profile.getEmail(),
+				picture: profile.getImageUrl()
+			};
+		}
+		else {
+			return undefined;
+		}
+	};
+
 	/// DATABASE HANDLING METHODS
 	
-	/// ASYNC RETURN!
+	// ASYNC RETURN!
 	//Loads all databses from user's Google Drive
 	methods.reloadDatabases = function(){
 		methods.log('Reloading all databases...');
@@ -276,7 +188,7 @@ var GVZ = (function() {
 		});
 	};
 	
-	/// ASYNC RETURN!
+	// ASYNC RETURN!
 	// Reloads all info on single database from user's Google Drive
 	methods.reloadDatabase = function(id){
 		methods.log('Reloading database "'+id+'"...');
@@ -287,22 +199,16 @@ var GVZ = (function() {
 				spreadsheetId: id
 			}).then(function(response){				
 				// create new database object from base methods
-				var database = Object.create(); /// TODO: Use constructor
-				database.name = response.result.properties.title;
-				database.id = id;
+				var database = new Database(response.result.properties.title, id, []);
 				methods.log(database.id+': '+database.name);
-				database.tables = [];
 				
 				// start building the pages
 				let sheets = response.result.sheets; // response's pages
-				let ranges = [];
+				let ranges = []; // header and datatype rows to check
 				
 				for (let i = 0; i < sheets.length; i++){
-					let table = {};
-					table.name = sheets[i].properties.title;
-					table.id = sheets[i].properties.sheetId;
-					table.columns = [];
-					database.tables.push(table);
+					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId, []);
+					database.pushTable(table);
 					ranges.push(sheets[i].properties.title+'!1:2');
 				}
 				
@@ -319,14 +225,11 @@ var GVZ = (function() {
 							let drow = response.result.sheets[i].data[0].rowData[1].values;
 						
 							for (let r = 0; r < hrow.length; r++){
-								let col = {};
+								let col = new Column();
 								try { col.header = hrow[r].formattedValue; }
 								catch (e) { col.header = ""; }
-								try { col.datatype = drow[r].userEnteredFormat.numberFormat; }
-								catch (e) { col.datatype = undefined; }
-								try { col.validation = drow[r].dataValidation; }
-								catch (e) { col.validation = undefined; }
-								database.tables[i].columns.push(col);
+								col.datatype = methods.JSONtoDatatype(drow[r]);
+								database.tables[i].pushColumn(col);
 							}
 						}
 						
@@ -401,35 +304,221 @@ var GVZ = (function() {
 	}
 	*/
 	
-	/// QUERY METHODS
-	
-	/// ASYNC RETURN!
-	// Main query function
-	methods.query = function(database, table, string){
-		checkReqs(true);		
-		if (databases.length === 0){ methods.err('No databases are known. Try GVZ.reloadDatabases()'); }
-		// Ensure database is valid
-		if (!methods.isDatabase(database)) { methods.err('Unknown Database ID "'+database+'"'); }
-		if (!methods.isTable(database,table)) { methods.err('Unknown Table ID "'+table+'"'); }
-		
-		let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
-		// remove any "" caused by leading/trailing whitespace
-		for (let i = 0; i < unparsed.length; i++){
-			if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
-		}	
-		// Look for commands
-		p = unparsed.shift(0).toUpperCase();
-		switch (p){
-			case 'SELECT':
-				GVZ.log(p);
-			case 'UPDATE':
-				GVZ.log(p);
-			case 'APPEND':
-				GVZ.log(p);
-			default:
-				methods.err('Unexpected token "'+p+'" (expected SELECT UPDATE APPEND)');
-		}
+	methods.JSONtoDatatype = function(json){
+		console.log(json);
+		return Datatype("string");
 	};
+	
+	/// ***********
+	/// * CLASSES *
+	/// ***********
+	class Database {
+		constructor(name, id, tables){
+			this.name = name;
+			this.id = id;
+			this.tables = tables;
+			if (this.tables !== undefined){
+				for (let i = 0; i < this.tables.length; i++){
+					this.tables[i].parentId = this.id;
+				}
+			}
+		}
+		
+		// Returns table object given id
+		getTable(id){
+			for (let i = 0; i < this.tables.length; i++){
+				if (id == this.tables[i].id){ return this.tables[i]; }
+			}
+			return undefined;
+		}
+		
+		// Appends table to this database
+		pushTable(table){
+			table.parentId = this.id;
+			this.tables.push(table);
+		}
+	}
+	
+	class Table { 
+		constructor(name, id, columns){
+			this.name = name;
+			this.id = id;
+			this.columns = columns;
+			this.parentId = undefined;
+		}
+		
+		// Appends column to this table
+		pushColumn(column){
+			this.columns.push(column);
+		}
+		
+		// ASYNC RETURN!
+		// Main query function
+		query(string){
+			checkReqs(true);
+			if (databases.length === 0){ methods.err('No databases loaded. Try GVZ.reloadDatabases()'); }
+			if (this.parentId === undefined){ methods.err('Table was never attached to parent database. Check that "parentId" property gets set'); }
+			if (methods.getDatabase(this.parentId).getTable(this.id) != this){ methods.err('Table detached from database. Avoid changing "parentId" property of table objects and "tables" property of database objects'); }
+			
+			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
+			// remove any "" caused by leading/trailing whitespace
+			for (let i = 0; i < unparsed.length; i++){
+				if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
+			}	
+			// Look for commands
+			token = unparsed.shift(0).toUpperCase();
+			switch (token){
+				case 'SELECT':
+					GVZ.log(token);
+				case 'UPDATE':
+					GVZ.log(token);
+				case 'APPEND':
+					GVZ.log(token);
+				default:
+					methods.err('Unexpected token "'+token+'" (expected {SELECT|UPDATE|APPEND})');
+			}
+		}
+	}
+	
+	class Column {
+		constructor(header, datatype){
+			this.header = header;
+			this.datatype = datatype;
+		}
+	}
+	
+	// Used to compare sheets output to library datatyping
+	equals(other){
+		return (JSON.stringify(this.toJSON()) === JSON.stringify(other))
+	}
+	
+	class Datatype {
+		constructor(type, decimals){
+			if !(type in datatypes){ methods.err('Unknown type "'++'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
+			this.type = type;
+			this.decimals = decimals;
+		}
+		
+		// Converts library datatype to sheets JSON
+		toJSON(){
+			let datatypes = {
+				"string": function(ignored){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "TEXT",
+									"pattern": ""
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					}
+				},
+				"number": function(decimalPlaces){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "NUMBER",
+									"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					};
+				},
+				"unumber": function(decimalPlaces){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "NUMBER",
+									"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+								}
+							},
+							"dataValidation": {
+								"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
+								"strict": true
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat,dataValidation"
+					};
+				},
+				"date": function(ignored){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "DATE",
+									"pattern": "yyyy-mm-dd"
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					};
+				},
+				"time": function(ignored){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "TIME",
+									"pattern": "hh:mm:ss.000"
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					};
+				},
+				"datetime": function(ignored){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "DATE_TIME",
+									"pattern": "yyyy-mm-dd hh:mm:ss.000"
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					};
+				},
+				"duration": function(ignored){
+					return {
+						"cell": {
+							"userEnteredFormat": {
+								"numberFormat": {
+									"type": "TIME",
+									"pattern": "[hh]:[mm]:[ss].000"
+								}
+							}
+						},
+						"fields": "userEnteredFormat.numberFormat"
+					};
+				},
+				"boolean": function(ignored){
+					return {
+						"cell": {
+							"dataValidation": {
+								"condition": { "type": "BOOLEAN" },
+								"strict": true
+							}
+						},
+						"fields": "dataValidation"
+					};
+				}
+			};
+			return datatypes[this.type](this.decimals);
+		}
+	}
+
+	// Include classes in public methods
+	// Annoying to reference as methods.Class so done last
+	methods.Database = Database;
+	methods.Table = Table;
+	methods.Column = Column;
+	methods.Datatype = Datatype;
 	
 	/// EXPOSE PUBLIC METHODS TO USER
 	return methods;
