@@ -394,6 +394,115 @@ var GVZ = (function() {
 	}
 	*/
 	
+	var datatypes = {
+		"string": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TEXT",
+							"pattern": ""
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			}
+		},
+		"number": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"unumber": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					},
+					"dataValidation": {
+						"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
+						"strict": true
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat,dataValidation"
+			};
+		},
+		"date": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE",
+							"pattern": "yyyy-mm-dd"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"time": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": "hh:mm:ss.000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"datetime": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE_TIME",
+							"pattern": "yyyy-mm-dd hh:mm:ss.000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"duration": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": "[hh]:[mm]:[ss].000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"boolean": function(ignored){
+			return {
+				"cell": {
+					"dataValidation": {
+						"condition": { "type": "BOOLEAN" },
+						"strict": true
+					}
+				},
+				"fields": "dataValidation"
+			};
+		}
+	};
+	
 	class Datatype {
 		constructor(type, decimals){
 			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
@@ -403,114 +512,6 @@ var GVZ = (function() {
 		
 		// Converts library datatype to sheets JSON
 		toJSON(){
-			let datatypes = {
-				"string": function(ignored){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "TEXT",
-									"pattern": ""
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					}
-				},
-				"number": function(decimalPlaces){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "NUMBER",
-									"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					};
-				},
-				"unumber": function(decimalPlaces){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "NUMBER",
-									"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-								}
-							},
-							"dataValidation": {
-								"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
-								"strict": true
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat,dataValidation"
-					};
-				},
-				"date": function(ignored){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "DATE",
-									"pattern": "yyyy-mm-dd"
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					};
-				},
-				"time": function(ignored){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "TIME",
-									"pattern": "hh:mm:ss.000"
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					};
-				},
-				"datetime": function(ignored){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "DATE_TIME",
-									"pattern": "yyyy-mm-dd hh:mm:ss.000"
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					};
-				},
-				"duration": function(ignored){
-					return {
-						"cell": {
-							"userEnteredFormat": {
-								"numberFormat": {
-									"type": "TIME",
-									"pattern": "[hh]:[mm]:[ss].000"
-								}
-							}
-						},
-						"fields": "userEnteredFormat.numberFormat"
-					};
-				},
-				"boolean": function(ignored){
-					return {
-						"cell": {
-							"dataValidation": {
-								"condition": { "type": "BOOLEAN" },
-								"strict": true
-							}
-						},
-						"fields": "dataValidation"
-					};
-				}
-			};
 			return datatypes[this.type](this.decimals);
 		}
 	}
