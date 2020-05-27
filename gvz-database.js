@@ -298,25 +298,18 @@ var GVZ = (function() {
 		flair = "";
 	};
 	
-	/// TODO: Put this in a class
-	/*
-	methods.hasTable = function(table){
-		for (let i = 0; i < this.tables.length; i++){
-			if (table == this.tables[i].id) { return true; }
-		}
-		return false;
-	}
-	*/
-	
+	// Converts sheets JSON from cell read into Datatype object
 	// Messy function for a messy format
 	methods.JSONtoDatatype = function(json){
-		for (type in datatypes){
+		delete json.formattedValue;
+		if (json.hasOwnProperty("userEnteredFormat")){
+			json.userEnteredFormat.numberFormat.pattern = "";
+		}
+		for (var type in datatypes){
 			let format = datatypes[type]().cell;
-			try {
+			if (type !== "boolean"){
 				format.userEnteredFormat.numberFormat.pattern = "";
-				json.userEnteredFormat.numberFormat.pattern = "";
 			}
-			catch (e) {}
 			if (JSON.stringify(format) === JSON.stringify(json)){
 				if (type === "number" || type === "unumber"){
 					return new Datatype(type,
