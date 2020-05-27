@@ -396,7 +396,7 @@ var GVZ = (function() {
 	
 	class Datatype {
 		constructor(type, decimals){
-			if (!(type in datatypes)){ methods.err('Unknown type "'++'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
+			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
 			this.type = type;
 			this.decimals = decimals;
 		}
