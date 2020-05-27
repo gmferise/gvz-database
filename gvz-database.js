@@ -305,7 +305,17 @@ var GVZ = (function() {
 	*/
 	
 	methods.JSONtoDatatype = function(json){
-		console.log(json);
+		for (type in datatypes){
+			let format = datatypes[type].cell;
+			if (format.userEnteredFormat.numberFormat.type === json.userEnteredFormat.numberFormat.type
+				&&
+				JSON.stringify(format.dataValidation) === JSON.stringify(json.dataValidation)){
+				if (json.userEnteredFormat.numberFormat.pattern !== undefined && (type === "number" || type === "unumber")){
+					return new Datatype(type, json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
+				}
+				else { return new Datatype(type); }
+			}
+		}
 		return new Datatype("string");
 	};
 	
@@ -507,7 +517,9 @@ var GVZ = (function() {
 		constructor(type, decimals){
 			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
 			this.type = type;
-			this.decimals = decimals;
+			if (decimals !== undefined){
+				this.decimals = decimals;
+			}
 		}
 		
 		// Converts library datatype to sheets JSON
