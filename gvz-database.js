@@ -306,7 +306,7 @@ var GVZ = (function() {
 	
 	methods.JSONtoDatatype = function(json){
 		console.log(json);
-		return Datatype("string");
+		return new Datatype("string");
 	};
 	
 	/// ***********
