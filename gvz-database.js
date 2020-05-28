@@ -143,7 +143,7 @@ var GVZ = (function() {
 	
 	// ASYNC RETURN!
 	// Creates online database from database object with no id
-	// Returns new database ID
+	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
 		methods.log('Creating new database "'+database.name+'"');
 		if (!(database.isUnbound())){ methods.err('Failed to create new database "'+database.name+'" object is already bound to a spreadsheet'); }
@@ -243,8 +243,10 @@ var GVZ = (function() {
 							}
 						}).then(function(response){
 							if (response.status != 200){ reject(response); }
-							methods.log('Created new database "'+database.name+'"');
-							resolve(database);
+							methods.reloadDatabases().then(function(){
+								methods.log('Created new database "'+database.name+'"');
+								resolve(database);
+							});
 						});
 					});
 					
