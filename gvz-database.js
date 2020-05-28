@@ -89,7 +89,7 @@ var GVZ = (function() {
 	};
 	
 	// Returns current auth status
-	methods.getAuthStatus = function(){
+	methods.isAuth = function(){
 		checkReqs();
 		return GoogleAuth.isSignedIn.get();
 	};
@@ -147,7 +147,7 @@ var GVZ = (function() {
 	methods.createDatabase = function(database){
 		methods.log('Creating new database "'+database.name+'"...	');
 		if (!(database.isUnbound())){ methods.err('Failed to create new database "'+database.name+'" object is already bound to a spreadsheet'); }
-		if (database.tables.length < 1){ methods.err('Failed to create new database "'+database.name+'" object has no tables'); }
+		if (!(database.hasTables())){ methods.err('Failed to create new database "'+database.name+'" object has no tables'); }
 		if (!(database.areTablesUnbound())){ methods.err('Failed to create new database "'+database.name+'" at least one table is already bound to a page of a spreadsheet'); }
 		if (!(database.areTablesValid())){ methods.err('Failed to create new database "'+database.name+'" some tables have duplicate names'); }
 		checkReqs(true);
@@ -481,7 +481,7 @@ var GVZ = (function() {
 					return;
 				}
 			}
-			methods.log('No table matching "'+name+'" could be bound with id "'+id+'"');
+			methods.err('No table matching "'+name+'" could be bound with id "'+id+'"');
 		}
 			
 		// Returns whether all tables have been bound to an online source
@@ -499,7 +499,7 @@ var GVZ = (function() {
 			for (let i = 0; i < this.tables.length; i++){
 				if (id == this.tables[i].id){ return this.tables[i]; }
 			}
-			return undefined;
+			methods.err('Table with id "'+id+'" could not be found in database "'+this.name+'":"'+this.id+'"');
 		}
 		
 		// Appends table to this database
@@ -516,6 +516,29 @@ var GVZ = (function() {
 			}
 			return (findDuplicates(names).length < 1);
 		}
+		
+		// Checks if all tables have at least one column
+		tablesHaveColumns(){
+			for (let i = 0; i < this.tables.length; i++){
+				if (!(this.tables[i].hasColumns())){
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		// Checks if database has any tables
+		hasTables(){
+			return (this.tables.length < 1);
+		}
+		
+		// Checks if database has specific table
+		hasTable(id){
+			for (let i = 0; i < this.tables.length; i++){
+				if (id == this.tables[i].id){ return true; }
+			}
+			return false;
+		}
 	}
 	
 	class Table { 
@@ -524,6 +547,11 @@ var GVZ = (function() {
 			this.id = id;
 			this.columns = (columns === undefined) ? [] : columns;
 			this.parentId = undefined;
+		}
+		
+		// Returns whether this table belongs to a database
+		hasParent(){
+			return (this.parentId !== undefined && methods.isDatabase(this.parentId) && methods.getDatabase(this.parentId).hasTable(this.id));
 		}
 		
 		// Returns whether table has been bound to online source
@@ -536,13 +564,18 @@ var GVZ = (function() {
 			this.columns.push(column);
 		}
 		
+		// Checks if table has at least one column
+		hasColumns(){
+			return (this.columns.length > 1);
+		}
+		
 		// ASYNC RETURN!
 		// Main query function
 		query(string){
 			checkReqs(true);
 			if (databases.length === 0){ methods.err('No databases loaded. Try GVZ.reloadDatabases()'); }
-			if (this.parentId === undefined){ methods.err('Table was never attached to parent database. Check that "parentId" property gets set'); }
-			if (methods.getDatabase(this.parentId).getTable(this.id) != this){ methods.err('Table detached from database. Avoid changing "parentId" property of table objects and "tables" property of database objects'); }
+			if (this.isUnbound()){ methods.err('Table was never bound to its online counterpart'; }
+			if (!(this.hasParent())){ methods.err('Table is not attached to a database'); }
 			
 			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
 			// remove any "" caused by leading/trailing whitespace
