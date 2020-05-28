@@ -723,7 +723,7 @@ function padZeroes(width, num){
 }
 
 // Returns duplicates in an array
-function findDuplicates(array){
+function findDuplicates(arr){
 	let sorted_arr = arr.slice().sort();
 	let results = [];
 	for (let i = 0; i < sorted_arr.length - 1; i++) {
