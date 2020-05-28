@@ -338,7 +338,6 @@ var GVZ = (function() {
 					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
 				}).then(function(response){
 					if (response.status != 200){ reject(response); }
-					
 					try { // potential parsing errors, reject if any happen
 						// finish building the pages
 						for (let i = 0; i < response.result.sheets.length; i++){
@@ -370,7 +369,6 @@ var GVZ = (function() {
 						resolve(database);
 					}
 					catch (e) {
-						throw e;
 						methods.log('Failed to reload database "'+id+'"');
 						reject();
 					}
@@ -467,6 +465,25 @@ var GVZ = (function() {
 			return (this.id === undefined);
 		}
 		
+		// Unbinds database and its tables
+		unbind(){
+			this.id = undefined;
+			for (let i = 0; i < this.tables.length; i++){
+				this.tables[i].unbind();
+			}
+		}
+		
+		// Binds page id to whichever table has the matching name
+		bindTable(name, id){
+			for (let i = 0; i < this.tables.length; i++){
+				if (this.tables[i].isUnbound() && this.tables[i].name === name){
+					this.tables[i].id = id;
+					return;
+				}
+			}
+			methods.log('No table matching "'+name+'" could be bound with id "'+id+'"');
+		}
+			
 		// Returns whether all tables have been bound to an online source
 		areTablesUnbound(){
 			for (let i = 0; i < this.tables.length; i++){
@@ -489,17 +506,6 @@ var GVZ = (function() {
 		pushTable(table){
 			table.parentId = this.id;
 			this.tables.push(table);
-		}
-		
-		// Binds page id to whichever table has the matching name
-		bindTable(name, id){
-			for (let i = 0; i < this.tables.length; i++){
-				if (this.tables[i].isUnbound() && this.tables[i].name === name){
-					this.tables[i].id = id;
-					return;
-				}
-			}
-			methods.log('No table matching "'+name+'" could be bound with id "'+id+'"');
 		}
 		
 		// Checks if all pages have unique names
