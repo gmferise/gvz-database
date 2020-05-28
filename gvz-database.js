@@ -142,6 +142,118 @@ var GVZ = (function() {
 	/// DATABASE HANDLING METHODS
 	
 	// ASYNC RETURN!
+	// Creates online database from database object with no id
+	// Returns new database ID
+	methods.createDatabase = function(database){
+		methods.log('Creating new database "'+database.name+'"');
+		if (!(database.isUnbound())){ methods.err('Failed to create new database "'+database.name+'" object is already bound to a spreadsheet'); }
+		if (!(database.areTablesUnbound())){ methods.err('Failed to create new database "'+database.name+'" at least one table is already bound to a page of a spreadsheet'); }
+		if (!(database.areTablesValid())){ methods.err('Failed to create new database "'+database.name+'" some tables have duplicate names'); }
+		checkReqs(true);
+		return new Promise(function(resolve,reject){
+			gapi.client.sheets.spreadsheets.create({
+				'properties': { 
+					'title': database.name
+				}
+			}).then(function(response){
+				if (response.status != 200){ reject(response); }
+				
+				database.id = response.result.spreadsheetId;
+				
+				let requests = [];
+				// Add new pages
+				for (let i = 0; i < database.tables.length; i++){
+					requests.push({
+						'addSheet': {
+							'properties': {
+								'title':database.tables[i].name
+							}
+						}
+					})
+				}
+				// Remove first page
+				requests.push({
+					'deleteSheet': {
+						'sheetId': 0
+					}
+				});
+				
+				// Do first batch
+				gapi.client.sheets.spreadsheets.batchUpdate({
+					'spreadsheetId': database.id,
+					'resource': {
+						'requests': requests
+					}
+				}).then(function(response){
+					if (response.status != 200){ reject(response); }
+					
+					// See what the new page ids are
+					gapi.client.sheets.spreadsheets.get({
+						'spreadsheetId': database.id
+					}).then(function(response){
+						if (response.status != 200){ reject(response); }
+						
+						// Bind the page ids
+						for (let i = 0; i < response.result.sheets.length; i++){
+							database.bindTable(response.result.sheets[i].properties.title, response.result.sheets[i].properties.sheetId);
+						}
+						
+						// Now build the requests to configure the columns 
+						let requests = [];
+						for (let t = 0; t < database.tables.length; t++){
+							let headers = [];
+							for (let c = 0; c < database.tables[t].columns.length; c++){
+								// Applies format
+								let json = database.tables[t].columns[c].datatype.toJSON();
+								requests.push({
+									'repeatCell': {
+										'range': {
+											'sheetId': database.tables[t].columns[c].id,
+											'startRowIndex': 0,
+											'startColumnIndex': c,
+											'endColumnIndex': c+1
+										},
+										'cell': json.cell,
+										'fields': json.fields
+									}
+								});
+								// Applies header
+								headers.push({'userEnteredValue': {'stringValue': database.tables[t].columns[c].header }});
+							}
+							// Only one action is needed for the headers
+							requests.push({
+								'updateCells': {
+									'rows': [{
+										'values': headers
+									}],
+									'fields': 'userEnteredValue',
+									'start': {
+										'sheetId': database.tables[t].columns[c].id,
+										'rowIndex': 0,
+										'columnIndex': 0
+									}
+								}
+							});
+						}
+						// Now do all the requests for each page
+						gapi.client.sheets.spreadsheets.batchUpdate({
+							'spreadsheetId': database.id,
+							'resource': {
+								'requests': requests
+							}
+						}).then(function(response){
+							if (response.status != 200){ reject(response); }
+							methods.log('Created new database "'+database.name+'"');
+							resolve(database);
+						});
+					});
+					
+				});
+			});
+		});
+	}
+	
+	// ASYNC RETURN!
 	//Loads all databses from user's Google Drive
 	methods.reloadDatabases = function(){
 		methods.log('Reloading all databases...');
@@ -152,14 +264,16 @@ var GVZ = (function() {
 			gapi.client.drive.files.list({
 				q: params,
 			}).then(function(response) {
+				if (response.status != 200){ reject(response); }
+				
 				let newDatabases = response.result.files;
 				
 				// filter recieved databases if necessary
 				if (flair != ""){
-					methods.log("Filtering by flair '["+flair+"]'");
+					methods.log('Filtering by flair "['+flair+']"');
 					for (let i = 0; i < newDatabases.length; i++){
 						if (newDatabases[i].name.substring(0, ('['+flair+']').length) != '['+flair+']'){
-							methods.log("Filtered out database '"+newDatabases[i].name+"'");
+							methods.log('Filtered out database "'+newDatabases[i].name+'"');
 							newDatabases.splice(i,1);
 							i--;
 						}
@@ -197,7 +311,9 @@ var GVZ = (function() {
 			// get spreadsheet name, id, and pages
 			gapi.client.sheets.spreadsheets.get({
 				spreadsheetId: id
-			}).then(function(response){				
+			}).then(function(response){
+				if (response.status != 200){ reject(response); }				
+				
 				// create new database object from base methods
 				var database = new Database(response.result.properties.title, id, []);
 				methods.log(database.id+': '+database.name);
@@ -218,6 +334,8 @@ var GVZ = (function() {
 					ranges: ranges,
 					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
 				}).then(function(response){
+					if (response.status != 200){ reject(response); }
+					
 					try { // potential parsing errors, reject if any happen
 						// finish building the pages
 						for (let i = 0; i < response.result.sheets.length; i++){
@@ -270,9 +388,7 @@ var GVZ = (function() {
 				if (databases[i].id == id) { return databases[i]; }
 			}
 		}
-		else {
-			methods.err('Unknown Database ID "'+database+'"');
-		}
+		else { methods.err('Unknown Database ID "'+database+'"'); }
 	};
 	
 	// Returns whether a database exists give its id
@@ -301,20 +417,26 @@ var GVZ = (function() {
 	// Converts sheets JSON from cell read into Datatype object
 	// Messy function for a messy format
 	methods.JSONtoDatatype = function(json){
+		// Clean up the JSON for better comparisons
 		delete json.formattedValue;
+		// Ignore/fix patterns and strictness of validation
 		if (json.hasOwnProperty("userEnteredFormat")){
 			json.userEnteredFormat.numberFormat.pattern = "";
 		}
+		if (json.hasOwnProperty("dataValidation")){
+			json.dataValidation.strict = true;
+		}		
+		
+		// See which datatype it matches
 		for (var type in datatypes){
+			// Clean up datatype format for comparison
 			let format = datatypes[type]().cell;
-			if (type !== "boolean"){
-				format.userEnteredFormat.numberFormat.pattern = "";
-			}
+			if (type !== "boolean"){ format.userEnteredFormat.numberFormat.pattern = ""; }
+			// Do comparison
 			if (JSON.stringify(format) === JSON.stringify(json)){
 				if (type === "number" || type === "unumber"){
-					return new Datatype(type,
-					// Converts pattern to number of decimals
-					json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
+					// Converts existing number pattern to number of decimals
+					return new Datatype(type,json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
 				}
 				else { return new Datatype(type); }
 			}
@@ -337,6 +459,21 @@ var GVZ = (function() {
 			}
 		}
 		
+		// Returns whether database has been bound to online source
+		isUnbound(){
+			return (this.id === undefined);
+		}
+		
+		// Returns whether all tables have been bound to an online source
+		areTablesUnbound(){
+			for (let i = 0; i < this.tables.length; i++){
+				if (!(this.tables[i].isUnbound())){
+					return false;
+				}
+			}
+			return true;
+		}
+		
 		// Returns table object given id
 		getTable(id){
 			for (let i = 0; i < this.tables.length; i++){
@@ -350,6 +487,26 @@ var GVZ = (function() {
 			table.parentId = this.id;
 			this.tables.push(table);
 		}
+		
+		// Binds page id to whichever table has the matching name
+		bindTable(name, id){
+			for (let i = 0; i < this.tables.length; i++){
+				if (this.tables[i].isUnbound() && this.tables[i].name === name){
+					this.tables[i].id = id;
+					return;
+				}
+			}
+			methods.log('No table matching "'+name+'" could be bound with id "'+id+'"');
+		}
+		
+		// Checks if all pages have unique names
+		areTablesValid(){
+			let names = [];
+			for (let i = 0; i < this.tables.length; i++){
+				names.push(this.tables[i].name);
+			}
+			return (findDuplicates(names).length > 0);
+		}
 	}
 	
 	class Table { 
@@ -358,6 +515,11 @@ var GVZ = (function() {
 			this.id = id;
 			this.columns = columns;
 			this.parentId = undefined;
+		}
+		
+		// Returns whether table has been bound to online source
+		isUnbound(){
+			return (this.id === undefined);
 		}
 		
 		// Appends column to this table
@@ -556,4 +718,16 @@ function padZeroes(width, num){
 		return new Array(width+(/\./.test(num) ? 2 : 1)).join('0')+num;
 	}
 	return num+"";
+}
+
+// Returns duplicates in an array
+function findDuplicates(array){
+	let sorted_arr = arr.slice().sort();
+	let results = [];
+	for (let i = 0; i < sorted_arr.length - 1; i++) {
+		if (sorted_arr[i+1] == sorted_arr[i]) {
+			results.push(sorted_arr[i]);
+		}
+	}
+	return results;
 }
