@@ -229,7 +229,7 @@ var GVZ = (function() {
 									}],
 									'fields': 'userEnteredValue',
 									'start': {
-										'sheetId': database.tables[t].columns[c].id,
+										'sheetId': database.tables[t].id,
 										'rowIndex': 0,
 										'columnIndex': 0
 									}
