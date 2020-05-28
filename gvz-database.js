@@ -451,7 +451,7 @@ var GVZ = (function() {
 		constructor(name, id, tables){
 			this.name = name;
 			this.id = id;
-			this.tables = tables;
+			this.tables = (tables === undefined) ? [] : tables;
 			if (this.tables !== undefined){
 				for (let i = 0; i < this.tables.length; i++){
 					this.tables[i].parentId = this.id;
@@ -513,7 +513,7 @@ var GVZ = (function() {
 		constructor(name, id, columns){
 			this.name = name;
 			this.id = id;
-			this.columns = columns;
+			this.columns = (columns === undefined) ? [] : columns;
 			this.parentId = undefined;
 		}
 		
