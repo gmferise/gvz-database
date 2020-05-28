@@ -145,8 +145,9 @@ var GVZ = (function() {
 	// Creates online database from database object with no id
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
-		methods.log('Creating new database "'+database.name+'"');
+		methods.log('Creating new database "'+database.name+'"...	');
 		if (!(database.isUnbound())){ methods.err('Failed to create new database "'+database.name+'" object is already bound to a spreadsheet'); }
+		if (database.tables.length < 1){ methods.err('Failed to create new database "'+database.name+'" object has no tables'); }
 		if (!(database.areTablesUnbound())){ methods.err('Failed to create new database "'+database.name+'" at least one table is already bound to a page of a spreadsheet'); }
 		if (!(database.areTablesValid())){ methods.err('Failed to create new database "'+database.name+'" some tables have duplicate names'); }
 		checkReqs(true);
@@ -507,7 +508,7 @@ var GVZ = (function() {
 			for (let i = 0; i < this.tables.length; i++){
 				names.push(this.tables[i].name);
 			}
-			return (findDuplicates(names).length > 0);
+			return (findDuplicates(names).length < 1);
 		}
 	}
 	
