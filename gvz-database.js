@@ -209,7 +209,7 @@ var GVZ = (function() {
 								requests.push({
 									'repeatCell': {
 										'range': {
-											'sheetId': database.tables[t].columns[c].id,
+											'sheetId': database.tables[t].id,
 											'startRowIndex': 0,
 											'startColumnIndex': c,
 											'endColumnIndex': c+1
