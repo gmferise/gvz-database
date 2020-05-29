@@ -574,7 +574,7 @@ var GVZ = (function() {
 		query(string){
 			checkReqs(true);
 			if (databases.length === 0){ methods.err('No databases loaded. Try GVZ.reloadDatabases()'); }
-			if (this.isUnbound()){ methods.err('Table was never bound to its online counterpart'; }
+			if (this.isUnbound()){ methods.err('Table was never bound to its online counterpart'); }
 			if (!(this.hasParent())){ methods.err('Table is not attached to a database'); }
 			
 			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
