@@ -125,12 +125,12 @@ var GVZ = (function() {
 	};
 	
 	// Converts library datatype to sheets JSON
-	datatypeToJSON(datatype){
+	function datatypeToJSON(datatype){
 		return datatypes[datatype.type](datatype.decimals);
 	}
 	
 	// Converts JSON to library datatype
-	JSONtoDatatype = function(json){
+	function JSONtoDatatype(json){
 		// Clean up the JSON for better comparisons
 		delete json.formattedValue;
 		// Ignore/fix patterns and strictness of validation
@@ -156,7 +156,7 @@ var GVZ = (function() {
 			}
 		}
 		return undefined;
-	};
+	}
 	
 	// Checks whether requirements for running a method are met
 	// Always requires gapi and GoogleAuth to be loaded
