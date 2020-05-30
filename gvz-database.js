@@ -14,6 +14,150 @@ var GVZ = (function() {
 	/// * PRIVATE METHODS *
 	/// *******************
 	
+	
+	const datatypes = {
+		"string": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TEXT",
+							"pattern": ""
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			}
+		},
+		"number": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"unumber": function(decimalPlaces){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "NUMBER",
+							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
+						}
+					},
+					"dataValidation": {
+						"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
+						"strict": true
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat,dataValidation"
+			};
+		},
+		"date": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE",
+							"pattern": "yyyy-mm-dd"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"time": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": "hh:mm:ss.000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"datetime": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "DATE_TIME",
+							"pattern": "yyyy-mm-dd hh:mm:ss.000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"duration": function(ignored){
+			return {
+				"cell": {
+					"userEnteredFormat": {
+						"numberFormat": {
+							"type": "TIME",
+							"pattern": "[hh]:[mm]:[ss].000"
+						}
+					}
+				},
+				"fields": "userEnteredFormat.numberFormat"
+			};
+		},
+		"boolean": function(ignored){
+			return {
+				"cell": {
+					"dataValidation": {
+						"condition": { "type": "BOOLEAN" },
+						"strict": true
+					}
+				},
+				"fields": "dataValidation"
+			};
+		}
+	};
+	
+	// Converts library datatype to sheets JSON
+	datatypeToJSON(datatype){
+		return datatypes[datatype.type](datatype.decimals);
+	}
+	
+	// Converts JSON to library datatype
+	JSONtoDatatype = function(json){
+		// Clean up the JSON for better comparisons
+		delete json.formattedValue;
+		// Ignore/fix patterns and strictness of validation
+		if (json.hasOwnProperty("userEnteredFormat")){
+			json.userEnteredFormat.numberFormat.pattern = "";
+		}
+		if (json.hasOwnProperty("dataValidation")){
+			json.dataValidation.strict = true;
+		}		
+		
+		// See which datatype it matches
+		for (var type in datatypes){
+			// Clean up datatype format for comparison
+			let format = datatypes[type]().cell;
+			if (type !== "boolean"){ format.userEnteredFormat.numberFormat.pattern = ""; }
+			// Do comparison
+			if (JSON.stringify(format) === JSON.stringify(json)){
+				if (type === "number" || type === "unumber"){
+					// Converts existing number pattern to number of decimals
+					return new Datatype(type,json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
+				}
+				else { return new Datatype(type); }
+			}
+		}
+		return undefined;
+	};
+	
 	// Checks whether requirements for running a method are met
 	// Always requires gapi and GoogleAuth to be loaded
 	// requireAuth (optional) true requires user to be signed in with GoogleAuth
@@ -142,14 +286,15 @@ var GVZ = (function() {
 	/// DATABASE HANDLING METHODS
 	
 	// ASYNC RETURN!
-	// Creates online database from database object with no id
+	// Creates online database from database template object
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
 		methods.log('Creating new database "'+database.name+'"...	');
-		if (!(database.isUnbound())){ methods.err('Failed to create new database "'+database.name+'" object is already bound to a spreadsheet'); }
-		if (!(database.hasTables())){ methods.err('Failed to create new database "'+database.name+'" object has no tables'); }
-		if (!(database.areTablesUnbound())){ methods.err('Failed to create new database "'+database.name+'" at least one table is already bound to a page of a spreadsheet'); }
-		if (!(database.areTablesValid())){ methods.err('Failed to create new database "'+database.name+'" some tables have duplicate names'); }
+		if (!(database.isValid())){ methods.err('Failed to create new database "'+database.name+'" malformed template'); }
+		
+		// Clone database object so we can modify it
+		database = JSON.parse(JSON.stringify(database));
+		
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
 			gapi.client.sheets.spreadsheets.create({
@@ -159,6 +304,7 @@ var GVZ = (function() {
 			}).then(function(response){
 				if (response.status != 200){ reject(response); }
 				
+				// Store new id
 				database.id = response.result.spreadsheetId;
 				
 				let requests = [];
@@ -194,9 +340,14 @@ var GVZ = (function() {
 					}).then(function(response){
 						if (response.status != 200){ reject(response); }
 						
-						// Bind the page ids
+						// Assign the new the page ids
 						for (let i = 0; i < response.result.sheets.length; i++){
-							database.bindTable(response.result.sheets[i].properties.title, response.result.sheets[i].properties.sheetId);
+							for (let t = 0; t < database.tables.length; t++){
+								if (database.tables[t].name == response.result.sheets[i].properties.title){
+									databases.tables[t].id = response.result.sheets[i].properties.id;
+									break;
+								}
+							}
 						}
 						
 						// Now build the requests to configure the columns 
@@ -205,7 +356,7 @@ var GVZ = (function() {
 							let headers = [];
 							for (let c = 0; c < database.tables[t].columns.length; c++){
 								// Applies format
-								let json = database.tables[t].columns[c].datatype.toJSON();
+								let json = datatypeToJSON(database.tables[t].columns[c].datatype);
 								requests.push({
 									'repeatCell': {
 										'range': {
@@ -244,9 +395,9 @@ var GVZ = (function() {
 							}
 						}).then(function(response){
 							if (response.status != 200){ reject(response); }
-							methods.reloadDatabases().then(function(){
-								methods.log('Created new database "'+database.name+'"');
-								resolve(database);
+							methods.reloadDatabase(database.id).then(function(newDatabase){
+								methods.log('Created new database "'+newDatabase.name+'"');
+								resolve(newDatabase);
 							});
 						});
 					});
@@ -307,6 +458,7 @@ var GVZ = (function() {
 	
 	// ASYNC RETURN!
 	// Reloads all info on single database from user's Google Drive
+	// Resolves with new database object
 	methods.reloadDatabase = function(id){
 		methods.log('Reloading database "'+id+'"...');
 		checkReqs(true);
@@ -348,7 +500,7 @@ var GVZ = (function() {
 								let col = new Column();
 								try { col.header = hrow[c].formattedValue; }
 								catch (e) { col.header = ""; }
-								col.datatype = methods.JSONtoDatatype(drow[c]);
+								col.datatype = JSONtoDatatype(drow[c]);
 								if (col.datatype === undefined){
 									methods.err('Could not determine datatype for column '+c+' ('+col.header+')');
 								}
@@ -414,45 +566,85 @@ var GVZ = (function() {
 	methods.clearFlair = function(){
 		flair = "";
 	};
-	
-	// Converts sheets JSON from cell read into Datatype object
-	// Messy function for a messy format
-	methods.JSONtoDatatype = function(json){
-		// Clean up the JSON for better comparisons
-		delete json.formattedValue;
-		// Ignore/fix patterns and strictness of validation
-		if (json.hasOwnProperty("userEnteredFormat")){
-			json.userEnteredFormat.numberFormat.pattern = "";
-		}
-		if (json.hasOwnProperty("dataValidation")){
-			json.dataValidation.strict = true;
-		}		
 		
-		// See which datatype it matches
-		for (var type in datatypes){
-			// Clean up datatype format for comparison
-			let format = datatypes[type]().cell;
-			if (type !== "boolean"){ format.userEnteredFormat.numberFormat.pattern = ""; }
-			// Do comparison
-			if (JSON.stringify(format) === JSON.stringify(json)){
-				if (type === "number" || type === "unumber"){
-					// Converts existing number pattern to number of decimals
-					return new Datatype(type,json.userEnteredFormat.numberFormat.pattern.replace(/[^0#\.]/g,"").replace(/([0#]+)?\.?/,"").length);
-				}
-				else { return new Datatype(type); }
-			}
-		}
-		return undefined;
-	};
-	
 	/// ***********
 	/// * CLASSES *
 	/// ***********
+	
+	class DatabaseTemplate {
+		constructor(name, tables){
+			this.name = (flair !== undefined && flair !== '') ? '['+flair+'] '+name : name;
+			this.tables = (tables === undefined) ? [] : tables;
+		}
+		
+		// Appends table to this database
+		pushTable(table){
+			this.tables.push(table);
+		}
+		
+		// Checks if all tables have unique names and are valid
+		areTablesValid(){
+			let names = [];
+			for (let i = 0; i < this.tables.length; i++){
+				names.push(this.tables[i].name);
+				if (!(this.tables[i].isValid())){
+					return false;
+				}
+			}
+			return (findDuplicates(names).length < 1);
+		}
+	}
+	
+	class TableTemplate { 
+		constructor(name, columns){
+			this.name = name;
+			this.columns = (columns === undefined) ? [] : columns;
+		}
+		
+		// Appends column to this table
+		pushColumn(column){
+			this.columns.push(column);
+		}
+		
+		// Checks if table has valid columns
+		isValid(){
+			for (let i = 0; i < this.columns.length; i++){
+				if (!(this.columns[i].isValid())){
+					return false;
+				}
+			}
+			return (this.columns.length > 1);
+		}
+	}
+	
+	class ColumnTemplate {
+		constructor(header, type, decimals){
+			this.header = header;
+			this.datatype = DatatypeTemplate(type, decimals);
+		}
+		
+		// Returns if there is a header and a datatype
+		isValid(){
+			return (this.header !== undefined && this.header !== "" && this.datatype !== undefined);
+		}
+	}
+	
+	class DatatypeTemplate {
+		constructor(type, decimals){
+			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
+			this.type = type;
+			if (decimals !== undefined){
+				this.decimals = decimals;
+			}
+		}
+	}
+	
 	class Database {
 		constructor(name, id, tables){
 			this.name = name;
 			this.id = id;
 			this.tables = (tables === undefined) ? [] : tables;
+			// Bind tables to database
 			if (this.tables !== undefined){
 				for (let i = 0; i < this.tables.length; i++){
 					this.tables[i].parentId = this.id;
@@ -460,84 +652,18 @@ var GVZ = (function() {
 			}
 		}
 		
-		// Returns whether database has been bound to online source
-		isUnbound(){
-			return (this.id === undefined);
+		// Appends table to this database
+		pushTable(table){
+			table.parentId = this.id; // bind table to database
+			this.tables.push(table);
 		}
 		
-		// Unbinds database and its tables
-		unbind(){
-			this.id = undefined;
-			for (let i = 0; i < this.tables.length; i++){
-				this.tables[i].unbind();
-			}
-		}
-		
-		// Binds page id to whichever table has the matching name
-		bindTable(name, id){
-			for (let i = 0; i < this.tables.length; i++){
-				if (this.tables[i].isUnbound() && this.tables[i].name === name){
-					this.tables[i].id = id;
-					return;
-				}
-			}
-			methods.err('No table matching "'+name+'" could be bound with id "'+id+'"');
-		}
-			
-		// Returns whether all tables have been bound to an online source
-		areTablesUnbound(){
-			for (let i = 0; i < this.tables.length; i++){
-				if (!(this.tables[i].isUnbound())){
-					return false;
-				}
-			}
-			return true;
-		}
-		
-		// Returns table object given id
+		// Returns table object given id or undefined
 		getTable(id){
 			for (let i = 0; i < this.tables.length; i++){
 				if (id == this.tables[i].id){ return this.tables[i]; }
 			}
-			methods.err('Table with id "'+id+'" could not be found in database "'+this.name+'":"'+this.id+'"');
-		}
-		
-		// Appends table to this database
-		pushTable(table){
-			table.parentId = this.id;
-			this.tables.push(table);
-		}
-		
-		// Checks if all pages have unique names
-		areTablesValid(){
-			let names = [];
-			for (let i = 0; i < this.tables.length; i++){
-				names.push(this.tables[i].name);
-			}
-			return (findDuplicates(names).length < 1);
-		}
-		
-		// Checks if all tables have at least one column
-		tablesHaveColumns(){
-			for (let i = 0; i < this.tables.length; i++){
-				if (!(this.tables[i].hasColumns())){
-					return false;
-				}
-			}
-			return true;
-		}
-		
-		// Checks if database has any tables
-		hasTables(){
-			return (this.tables.length < 1);
-		}
-		
-		// Checks if database has specific table
-		hasTable(id){
-			for (let i = 0; i < this.tables.length; i++){
-				if (id == this.tables[i].id){ return true; }
-			}
-			return false;
+			return undefined;
 		}
 	}
 	
@@ -549,24 +675,9 @@ var GVZ = (function() {
 			this.parentId = undefined;
 		}
 		
-		// Returns whether this table belongs to a database
-		hasParent(){
-			return (this.parentId !== undefined && methods.isDatabase(this.parentId) && methods.getDatabase(this.parentId).hasTable(this.id));
-		}
-		
-		// Returns whether table has been bound to online source
-		isUnbound(){
-			return (this.id === undefined);
-		}
-		
 		// Appends column to this table
 		pushColumn(column){
 			this.columns.push(column);
-		}
-		
-		// Checks if table has at least one column
-		hasColumns(){
-			return (this.columns.length > 1);
 		}
 		
 		// ASYNC RETURN!
@@ -604,122 +715,6 @@ var GVZ = (function() {
 		}
 	}
 	
-	/*
-	// Used to compare sheets output to library datatyping
-	equals(other){
-		return (JSON.stringify(this.toJSON()) === JSON.stringify(other))
-	}
-	*/
-	
-	var datatypes = {
-		"string": function(ignored){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TEXT",
-							"pattern": ""
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			}
-		},
-		"number": function(decimalPlaces){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "NUMBER",
-							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"unumber": function(decimalPlaces){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "NUMBER",
-							"pattern": "0"+(decimalPlaces > 0 ? '.'+'0'.repeat(decimalPlaces) : '')
-						}
-					},
-					"dataValidation": {
-						"condition": { "type": "NUMBER_GREATER_THAN_EQ", "values": [{"userEnteredValue": "0"}] },
-						"strict": true
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat,dataValidation"
-			};
-		},
-		"date": function(ignored){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "DATE",
-							"pattern": "yyyy-mm-dd"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"time": function(ignored){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TIME",
-							"pattern": "hh:mm:ss.000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"datetime": function(ignored){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "DATE_TIME",
-							"pattern": "yyyy-mm-dd hh:mm:ss.000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"duration": function(ignored){
-			return {
-				"cell": {
-					"userEnteredFormat": {
-						"numberFormat": {
-							"type": "TIME",
-							"pattern": "[hh]:[mm]:[ss].000"
-						}
-					}
-				},
-				"fields": "userEnteredFormat.numberFormat"
-			};
-		},
-		"boolean": function(ignored){
-			return {
-				"cell": {
-					"dataValidation": {
-						"condition": { "type": "BOOLEAN" },
-						"strict": true
-					}
-				},
-				"fields": "dataValidation"
-			};
-		}
-	};
-	
 	class Datatype {
 		constructor(type, decimals){
 			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
@@ -728,19 +723,14 @@ var GVZ = (function() {
 				this.decimals = decimals;
 			}
 		}
-		
-		// Converts library datatype to sheets JSON
-		toJSON(){
-			return datatypes[this.type](this.decimals);
-		}
 	}
 
 	// Include classes in public methods
 	// Annoying to reference as methods.Class so done last
-	methods.Database = Database;
-	methods.Table = Table;
-	methods.Column = Column;
-	methods.Datatype = Datatype;
+	methods.DatabaseTemplate = Database;
+	methods.TableTemplate = Table;
+	methods.ColumnTemplate = Column;
+	methods.DatatypeTemplate = Datatype;
 	
 	/// EXPOSE PUBLIC METHODS TO USER
 	return methods;

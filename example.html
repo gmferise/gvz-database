@@ -1,46 +1,87 @@
 <!DOCTYPE html>
+
+<!--
+Feel free to use this page as a starting point for your app.
+It's meant to be as bare-bones as possible, so you should definitely make it look better.
+Also, it's over-commented to make absolutely certain you know what's going on. Remove them!
+-->
+
 <html lang="en">
 	<head>
-		<!-- Bad practice, separate your styles! Using inline styles for simplicity here. -->
+		<!-- Bad practice, separate your styles! Only used here because this page is mostly unstyled.-->
 		<style>
 		.hidden {
-			display: none;
+			visiblity: hidden;
+		}
+		div.popup {
+			z-index: 200;
+			position: absolute;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0,0,0,0.5);
+		}
+		.dropdown:hover .dropdown-content {
+			display: block;
 		}
 		</style>
 	
 		<title>Example Implementation</title>
+		
 		<!-- First, load in the necessary Google libraries and APIs -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 		<script src="https://www.gstatic.com/charts/loader.js"></script>
 		<script> google.charts.load('current'); </script>
-		<!-- Append the GVZ library before the Google JavaScript API -->
+		
+		<!-- Append the GVZ library and your scripts library before the Google JavaScript API -->
 		<script src="gvz-database.js"></script>
+		<script src="example-scripts.js"></script>
+		
 		<!-- When the Google JavaScript API loads we tell the GVZ library to initialize
 		and sign the user in if their session is still active-->
 		<script async defer src="https://apis.google.com/js/api.js" 
-			onload="this.onload=GVZ.initialize('AIzaSyCEyNTPq0R6ALudyMMsICNEQLGfD0BnE1M','227233657145-chcnqd16a57odfb1e2hqrecnj4ns95g4.apps.googleusercontent.com',true);"
+			onload="this.onload=onDocumentReady()"
 			onreadystatechange="if (this.readyState === 'complete') this.onload()">
-		</script>
-		
-		<!-- Create a listener for whenever the user's auth status changes. -->
-		<script>
-			GVZ.setLogging(true); // off by default, useful for debugging
-			// Create the event callback and assign it
-			function authChanged(newStatus){ // Updates the UI to reflect new status
-				document.getElementById('auth-status').innerHTML = newStatus ? 'Welcome, '+GVZ.getUserInfo().firstName+'! You are currently signed in.' : 'You are currently signed out. Please sign in!';
-				document.getElementById('auth-button').innerHTML = newStatus ? 'Sign Out' : 'Sign In';
-				document.getElementById('choose-div').classList[newStatus ? 'remove' : 'add']('hidden');
-			}
-			GVZ.setAuthListener(authChanged);
 		</script>
 	</head>
 	
+	<!-- Make all of our elements. Look over at example-scripts.js for the functions that change them! -->
 	<body>
-	<!-- Make the elements we told the listener to change -->
-	<div id='auth-status'>You are currently signed out. Please sign in!</div>
-	<button id='auth-button' onclick="GVZ.toggleAuth()">Sign In</button>
-	<div id='choose-div' class='hidden'>
 		
-	</div>
-	</body>
+		<!-- Status text -->
+		<h2 id='status-auth'>You are currently signed out. Please sign in!</h2>
+		
+		<!-- Sign in/out button -->
+		<button id='toggle-auth' onclick="GVZ.toggleAuth()">Sign In</button>
+		
+		<!-- Set of elements shown once authenticated -->
+		<div id='div-choose' class='hidden'>
+			
+			<div id='popup-newdb' class='popup hidden'>
+				<div>Create New Database</div>
+				<p id='status-flair'></p>
+				<input id='input-newdb' type='text' placeholder='Database Name'></input>
+				<button id='submit-newdb' onclick='createDatabase();'>Ok</button>
+				<button onclick='popups.createNewDatabase(false);'>Cancel</button>
+			</div>
+			
+			<!-- New database button -->
+			<button onclick='popups.createNewDatabase(true);'>New</button>
+			
+			<!-- Dropdown to choose an existing database -->
+			<div class='dropdown'>
+				<!-- Main portion/top of dropdown, shows selected database -->
+				<span id='db-selection'>Select a database:</span>
+				<!-- Dropdown list portion, not yet populated -->
+				<div id='db-list' class='dropdown-content'>
+					<p>Loading databases...</p>
+				</div>
+			</div>
+		</div
+		
+		<!-- set of elements shown once a database is selected -->
+		<div id='div-interact' class='hidden'>
+		</div>
+		
+	</body>	
 </html>
