@@ -13,17 +13,6 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 		.hidden {
 			visibility: hidden;
 		}
-		div.popup {
-			z-index: 200;
-			position: absolute;
-			left: 0;
-			width: 100%;
-			height: 100%;
-			background: rgba(0,0,0,0.5);
-		}
-		.dropdown:hover .dropdown-content {
-			display: block;
-		}
 		</style>
 	
 		<title>Example Implementation</title>
@@ -57,13 +46,6 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 		<!-- Set of elements shown once authenticated -->
 		<div id='div-choose' class='hidden'>
 			
-			<div id='popup-newdb' class='popup hidden'>
-				<div>Create New Database</div>
-				<p id='status-flair'></p>
-				<input id='input-newdb' type='text' placeholder='Database Name'></input>
-				<button id='submit-newdb' onclick='createDatabase();'>Ok</button>
-				<button onclick='popups.createNewDatabase(false);'>Cancel</button>
-			</div>
 			
 			<!-- New database button -->
 			<button onclick='popups.createNewDatabase(true);'>New</button>

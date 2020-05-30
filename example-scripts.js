@@ -19,8 +19,6 @@ function onDocumentReady(){
 /// * Frontend Functions *
 /// **********************
 
-var popups = {};
-
 // Modifies UI whenever the auth status changes
 function authChanged(newStatus){
 	if (newStatus){ // now signed in
@@ -34,24 +32,6 @@ function authChanged(newStatus){
 		document.getElementById('div-choose').classList.add('hidden');
 	}
 }
-
-// Changes visibility on create database popup
-popups.createNewDatabase = function(setAsVisible){
-	if (setAsVisible){ // show the popup
-		document.getElementById('popup-newdb').classList.remove('hidden');
-		let flair = GVZ.getFlair();
-		if (flair !== ""){
-			document.getElementById('status-flair').value = '['+flair+'] ';
-		}
-		document.getElementById('input-newdb').focus();
-	}
-	else { // close the popup
-		document.getElementById('popup-newdb').classList.add('hidden');
-		document.getElementById('input-newdb').value = '';
-		document.getElementById('status-flair').value = '';
-		document.getElementById('submit-newdb').disabled = false;
-	}
-};
 
 // Reloads database dropdown from GVZ databases
 function refreshDatabaseDropdown(){
@@ -89,12 +69,10 @@ function selectDatabase(id){
 /// * Backend Functions *
 /// *********************
 
-// Creates database using input from 'input-newdb'
+// Creates database using user input
 function createDatabase(){
-	let name = document.getElementById('input-newdb').value;
-	if (name !== '') {
-		document.getElementById('submit-newdb').disabled = true;
-		
+	let name = window.prompt("Type a name for the new database","My Database");
+	if (name !== '' && name !== null) {
 		// Write your database structure here
 		let db = new GVZ.Database(name);
 		let tbl = new GVZ.Table('Attendance');
