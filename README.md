@@ -38,6 +38,8 @@ The intended use is to make it false for a page dedicated to signing in so the u
 then when you redirect them to the main page you can re-initialize the GVZ library and sign them back in.
 The default value is true.
 
+`GVZ.initialize()` returns a promise that is fulfilled when everything is finished loading.
+
 **Example:** 
 ```html
 <!-- FRONTEND -->
@@ -57,7 +59,9 @@ The default value is true.
 function loadGVZ(){
     let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
     let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
-    GVZ.initialize(apiKey,clientId,true);
+    GVZ.initialize(apiKey,clientId,true).then(function(){
+    
+    });
 }
 ```
 
