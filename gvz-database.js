@@ -14,7 +14,7 @@ var GVZ = (function() {
 	/// * PRIVATE METHODS *
 	/// *******************
 	
-	const getFlairString(){
+	function getFlairString(){
 		return flair === '' ? flair : '['+flair+'] ';
 	}
 	
