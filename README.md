@@ -60,7 +60,7 @@ function loadGVZ(){
     let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
     let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
     GVZ.initialize(apiKey,clientId,true).then(function(){
-    
+      // do other stuff
     });
 }
 ```
