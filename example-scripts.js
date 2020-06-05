@@ -13,7 +13,7 @@ function onDocumentReady(){
 				   '227233657145-chcnqd16a57odfb1e2hqrecnj4ns95g4.apps.googleusercontent.com',
 				    true
 	).then(function(){
-		GVZ.reloadDatabases().then(function(){
+		GVZ.reloadDatabases().then(function(databases){
 			refreshDatabaseDropdown();
 		});
 	});

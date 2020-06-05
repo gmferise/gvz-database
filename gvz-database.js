@@ -456,6 +456,7 @@ var GVZ = (function() {
 						}
 					});
 				}
+				resolve(databases); // no databases, oh well
 			});
 		});
 	};
