@@ -4,18 +4,14 @@
     * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
     * [Initializing the Library](#initializing-the-library)
-* [Library Objects](#library-objects)
-    * [Databases](#databases)
-    * [Tables](#tables)
-    * [Columns](#columns)
-    * [Datatypes](#datatypes)
-* [Library Methods](#library-methods)
+
+* [Library Operations](#library-operations)
     * [Logging and Errors](#logging-and-errors)
-	* [Handling Auth Status](#handling-auth-status)
-	* [Auth Status Listener](#auth-status-listener)
-	* [Creating Databases](#creating-databases)
-	* [Loading Databases](#loading-databases)
-	* [Querying Databases](#querying-databases)
+    * [Authenticating](#authenticating)
+    * [Listening for Auth Changes](#listening-for-auth-changes)
+    * [Loading Databases](#loading-databases)
+    * [Creating Databases](#creating-databases)
+    * [Querying Databases](#querying-databases)
 
 ## Setup
 
@@ -65,66 +61,16 @@ function loadGVZ(){
 }
 ```
 
-## Library Objects
-
-
-### Databases
-The GVZ library turns spreadsheets into a cleaner database object to be used in queries.
-The recommended way to access a database object is by its id using `GVZ.getDatabase(id)`, although you can also index the array returned by `GVZ.getDatabases()`.
-The id of a database is the same as the spreadsheet id found in the URL of a spreadsheet.
-This represents the structure of the database object.
-```yaml
-database = {
-    name: ""
-    id: ""
-    tables: []
-}
-```
-
-### Tables
-The GVZ library turns pages of a spreadsheet into a cleaner table object to be used in queries.
-This represents the structure of the table object, usually found in an array assigned to a database object's `tables` property.
-```yaml
-table = {
-    name: ""
-    id: ""
-    columns: []
-}
-```
-
-### Columns
-The GVZ library turns each column of a spreadsheet into datatyped and headed columns for data storage.
-This represents the structure of the column object, usually found in an array assigned to a table object's `columns` property.
-```yaml
-column = {
-    header: ""
-    datatype: {}
-}
-```
-
-### Datatypes
-The GVZ library allows for a simpler use of datatypes.
-This represents the structure of the datatype object, usually found in the `datatype` property of a column object.
-```yaml
-datatype = {
-    type: ""
-    decimals: 0
-}
-```
-The available datatypes are `string`, `number`, `unumber`, `duration`, `time`, `date`, `datetime`, and `boolean`.
-The decimals parameter is only used for `number` and `unumber` to define the number of decimal places to show
-
-## Library Methods
+## Library Operations
 
 ### Logging and Errors
-The GVZ library comes with it's own logging feature.
+The library comes with its own logging features.
 Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
-Logging is disabled by default since it's intended for debugging. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
+Logging is disabled by default. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
 
 You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
 
 You can also use `GVZ.err(string)` within your own code to throw a GVZ Error if you'd like, although they cannot be disabled.
-
 
 **Example:**
 ```javascript
@@ -137,43 +83,39 @@ GVZ.toggleLogging();
 GVZ.log("This will print to the console.");
 GVZ.setLogging(false);
 GVZ.log("This will not print to the console.");
+GVZ.err("Huston, we have a problem");
 ```
 
-
-### Handling Auth Status
+### Authenticating
 There are multiple functions that deal with the authentication status.
 
 `GVZ.toggleAuth()` is most useful as a button function and will sign in or sign out the user appropriately.
 
 `GVZ.signIn()` and `GVZ.signOut()` can be used to do this process manually if a toggle does not suit your needs.
 
-`GVZ.getAuthStatus()` returns a boolean representing whether the user is signed in or not.
+`GVZ.isAuth()` returns a boolean representing whether the user is signed in or not.
 
 These methods are primarily useful for asking the user to sign in, or forcing them to sign out.
 When updating the interface based on the user's auth status, it is recommended you use the auth status listener feature.
 
-### Auth Status Listener
+### Listening for Auth Changes
 It is recommended you make a listener function that will update your interface whenever the user's auth status changes.
 The library makes this easy with two functions.
 
-`GVZ.setAuthListener(yourFunction)` will tell the library to call yourFunction every time the user's auth status changes.
+`GVZ.setAuthListener(yourFunction)` will tell the library to call yourFunction every time the user's auth status changes. Your listener function should have one boolean parameter to receive the user's new auth status.
 
 `GVZ.clearAuthListener()` will clear whatever listener function the library is currently sending events to.
 
-Your listener function should take one boolean parameter which will be the user's new auth status.
 
 **Example:**
 ```javascript
 // Update UI when user's auth changes
 function authChanged(newStatus){
-    console.log("The user's auth status is now "+newStatus);
+    GVZ.log("The user's auth status is now "+newStatus);
     // TODO: Update some UI stuff
 }
 GVZ.setAuthListener(authChanged);
 ```
-
-### Creating Databases
-Nothing yet...
 
 ### Loading Databases
 Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
@@ -184,7 +126,7 @@ To limit the databases the library attempts to load, you can set a database flai
 When a flair is set, any databases created with the library will be given the name `[Flair] My Database` and `GVZ.reloadDatabases()` will only load databases with `[Flair]` at the start of their name (case sensitive, strict match).
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
 
-**Function Usage**
+**Example:**
 ```javascript
 // Both pairs of functions will print the same thing.
 // The reload functions are asynchronous and return the up-to-date versions in a promise
@@ -197,20 +139,52 @@ GVZ.reloadDatabase(id).then(function(database){ console.log(database); });
 console.log(GVZ.getDatabase(id));
 ```
 
-**Example:**
+### Creating Databases
+The classes `GVZ.Database`, `GVZ.Table`, and `GVZ.Column` make building databases structures easy.
+
+Passing in a database object into `GVZ.createDatabase(obj)` returns a promise with the resulting database object.
+
+If a flair is set, it will automatically be added into the name of the database, *do not* add it yourself.
+
+Your database *must*:
+* Have a name property defined that is not an empty string
+* Have at least one table in the tables property
+* Have tables with unique name properties (required by Sheets)
+* Have tables that:
+    * Have a name property defined that is not an empty string
+    * Have at least one column in the columns property
+    * Have columns that:
+        * Have a header property defined that is not an empty string
+        * Have a datatype defined
+
+**Examples:**
 ```javascript
-// Populate a dropdown to let user pick a database
-GVZ.setFlair("gvzDB");
-GVZ.reloadDatabases().then(function(databases){
-    let database = databases[0];
-    let dropdown = document.getElementById('db-list');
-    for (let i = 0; i < databases.length; i++){
-        let item = document.createElement('p');
-        item.innerText = databases[i].name;
-        item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
-        dropdown.appendChild(item);
-    }
+// standard verbose way
+let per3 = new GVZ.Database('Period 3');
+let tbl = new GVZ.Table('Attendance');
+tbl.columns.push(new GVZ.Column('student id','unumber',0));
+tbl.columns.push(new GVZ.Column('timestamp','datetime'));
+tbl.columns.push(new GVZ.Column('tardy','boolean'));
+db.tables.push(tbl);
+
+// shorter way
+let per4 = new GVZ.Database('Period 4',[
+    new GVZ.Table('Attendance',[
+        new GVZ.Column('student id','unumber',0)),
+        new GVZ.Column('timestamp','datetime')),
+        new GVZ.Column('tardy','boolean'))
+    ])//,
+    // could add more tables here
+]);
+
+// create database call is async
+GVZ.createDatabase(per3).then(function(newDatabase){
+    GVZ.createDatabase(per4).then(function(newDatabase){
+        // refresh UI here
+    });
 });
 ```
+
+
 
 ### Querying Databases
