@@ -440,23 +440,16 @@ var GVZ = (function() {
 				
 				// clear databases array and reload each new one
 				databases = [];
-				let requiredSuccesses = newDatabases.length;
+				let successes = 0;
 				for (let i = 0; i < newDatabases.length; i++){
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
-						// after every reload check to see if we did them all
-						if (databases.length >= requiredSuccesses){ 
-							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
-							resolve(databases);
-						}
-					}).catch(function(){ // if any reject then ignore them
-						requiredSuccesses--;
-						if (databases.length >= requiredSuccesses){ 
-							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
-							resolve(databases);
-						}
+						successes++;
+					}).catch(function(error){ // rejected, oh well
+						
 					});
 				}
-				resolve(databases); // no databases, oh well
+				methods.log('Finished reloading all databases. Skipped '+(successes-newDatabases.length)+'/'+newDatabases.length);
+				resolve(databases);
 			});
 		});
 	};
