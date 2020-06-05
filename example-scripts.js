@@ -13,7 +13,9 @@ function onDocumentReady(){
 	GVZ.setLogging(true); // off by default, useful for debugging	
 	GVZ.setFlair('GVZ'); // you should probably use a flair to limit search
 	GVZ.setAuthListener(authChanged); // set up the listener
-	refreshDatabaseDropdown();
+	GVZ.reloadDatabases().then(function(){
+		refreshDatabaseDropdown();
+	});
 }
 
 /// **********************
@@ -81,10 +83,10 @@ function createDatabase(){
 		// Write your database structure here
 		let db = new GVZ.Database(name);
 		let tbl = new GVZ.Table('Attendance');
-		tbl.pushColumn(new GVZ.Column('id','unumber',0));
-		tbl.pushColumn(new GVZ.Column('timestamp','datetime'));
-		tbl.pushColumn(new GVZ.Column('tardy','boolean'));
-		db.pushTable(tbl);
+		tbl.columns.push(new GVZ.Column('id','unumber',0));
+		tbl.columns.push(new GVZ.Column('timestamp','datetime'));
+		tbl.columns.push(new GVZ.Column('tardy','boolean'));
+		db.tables.push(tbl);
 		
 		GVZ.createDatabase(db).then(function(newDatabase){
 			refreshDatabaseDropdown();

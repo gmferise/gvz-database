@@ -14,6 +14,9 @@ var GVZ = (function() {
 	/// * PRIVATE METHODS *
 	/// *******************
 	
+	const getFlairString(){
+		return flair === '' ? flair : '['+flair+'] ';
+	}
 	
 	const datatypes = {
 		"string": function(ignored){
@@ -289,11 +292,12 @@ var GVZ = (function() {
 	// Creates online database from database template object
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
-		methods.log('Creating new database "'+database.name+'"...	');
-		if (!(database.isValid())){ methods.err('Failed to create new database "'+database.name+'" malformed template'); }
+		methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
+		if (!(database.isValid())){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
 		
-		// Clone database object so we can modify it
+		// Clone database template object so we can modify it
 		database = JSON.parse(JSON.stringify(database));
+		database.name = getFlairString()+database.name;
 		
 		checkReqs(true);
 		return new Promise(function(resolve,reject){
@@ -479,7 +483,7 @@ var GVZ = (function() {
 				
 				for (let i = 0; i < sheets.length; i++){
 					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId, []);
-					database.pushTable(table);
+					database.tables.push(table);
 					ranges.push(sheets[i].properties.title+'!1:2');
 				}
 				
@@ -504,7 +508,7 @@ var GVZ = (function() {
 								if (col.datatype === undefined){
 									methods.err('Could not determine datatype for column '+c+' ('+col.header+')');
 								}
-								database.tables[i].pushColumn(col);
+								database.tables[i].columns.push(col);
 							}
 						}
 						
@@ -573,17 +577,17 @@ var GVZ = (function() {
 	
 	class DatabaseTemplate {
 		constructor(name, tables){
-			this.name = (flair !== undefined && flair !== '') ? '['+flair+'] '+name : name;
+			this.name = name;
 			this.tables = (tables === undefined) ? [] : tables;
 		}
 		
-		// Appends table to this database
-		pushTable(table){
-			this.tables.push(table);
+		// Checks if database has valid name and tables
+		isValid(){
+			return (this.name !== undefined && this.name !== '' && this.tablesAreValid());
 		}
 		
 		// Checks if all tables have unique names and are valid
-		areTablesValid(){
+		tablesAreValid(){
 			let names = [];
 			for (let i = 0; i < this.tables.length; i++){
 				names.push(this.tables[i].name);
@@ -591,7 +595,7 @@ var GVZ = (function() {
 					return false;
 				}
 			}
-			return (findDuplicates(names).length < 1);
+			return (findDuplicates(names).length < 1 && this.tables.length > 0);
 		}
 	}
 	
@@ -601,11 +605,6 @@ var GVZ = (function() {
 			this.columns = (columns === undefined) ? [] : columns;
 		}
 		
-		// Appends column to this table
-		pushColumn(column){
-			this.columns.push(column);
-		}
-		
 		// Checks if table has valid columns
 		isValid(){
 			for (let i = 0; i < this.columns.length; i++){
@@ -613,7 +612,7 @@ var GVZ = (function() {
 					return false;
 				}
 			}
-			return (this.columns.length > 1);
+			return (this.columns.length > 0 && this.name !== '' && this.name !== undefined);
 		}
 	}
 	
@@ -652,12 +651,6 @@ var GVZ = (function() {
 			}
 		}
 		
-		// Appends table to this database
-		pushTable(table){
-			table.parentId = this.id; // bind table to database
-			this.tables.push(table);
-		}
-		
 		// Returns table object given id or undefined
 		getTable(id){
 			for (let i = 0; i < this.tables.length; i++){
@@ -673,11 +666,6 @@ var GVZ = (function() {
 			this.id = id;
 			this.columns = (columns === undefined) ? [] : columns;
 			this.parentId = undefined;
-		}
-		
-		// Appends column to this table
-		pushColumn(column){
-			this.columns.push(column);
 		}
 		
 		// ASYNC RETURN!
@@ -727,10 +715,9 @@ var GVZ = (function() {
 
 	// Include classes in public methods
 	// Annoying to reference as methods.Class so done last
-	methods.DatabaseTemplate = Database;
-	methods.TableTemplate = Table;
-	methods.ColumnTemplate = Column;
-	methods.DatatypeTemplate = Datatype;
+	methods.Database = DatabaseTemplate;
+	methods.Table = TableTemplate;
+	methods.Column = ColumnTemplate;
 	
 	/// EXPOSE PUBLIC METHODS TO USER
 	return methods;
