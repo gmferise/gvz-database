@@ -35,32 +35,36 @@ function authChanged(newStatus){
 
 // Reloads database dropdown from GVZ databases
 function refreshDatabaseDropdown(){
-	let dblist = document.getElementById('db-list');
+	let dropdown = document.getElementById('db-selection');
 	let master = GVZ.getDatabases();
-	dblist.innerHTML = '';
 	
-	for (let i = 0; i < master.length; i++){
-		let el = document.createElement('p');
-		el.innerText = master[i].name
-		el.setAttribute('onclick','selectDatabase("'+master[i].id+'");');
-		dblist.appendChild(el);
+	if (master.length > 0){
+		dblist.innerHTML = ''; // remove all children
+		
+		for (let i = 0; i < master.length; i++){
+			let el = document.createElement('option');
+			el.innerText = master[i].name;
+			el.setAttribute('value',master[i].id);
+			dblist.appendChild(el);
+		}
 	}
-	if (master.length < 1){
-		let el = document.createElement('p');
-		el.innerText = 'No databases found';
-		el.setAttribute('onclick','popups.createNewDatabase(true);');
+	else {
+		dblist.innerHTML = '';
+		let el = document.createElement('option');
+		el.innerText = No databases found
+		el.setAttribute('value','undefined');
 		dblist.appendChild(el);
 	}
 }
 
-// Selects a database or resets the selection
-function selectDatabase(id){
-	if (id === undefined){
-		document.getElementById('db-selection').innerText = 'Select a database:';
-		document.getElementById('div-interact').classList.add('hidden');
+// Selects a database if possible else makes a new one
+function selectDatabase(){
+	let id = document.getElementById.value;
+	if (id == 'undefined'){
+		createDatabase();
 	}
 	else {
-		document.getElementById('db-selection').innerText = GVZ.getDatabase(id).name;
+		currentDatabase = id;
 		document.getElementById('div-interact').classList.remove('hidden');
 	}
 }
@@ -83,7 +87,6 @@ function createDatabase(){
 		
 		GVZ.createDatabase(db).then(function(newDatabase){
 			refreshDatabaseDropdown();
-			selectDatabase(newDatabase.id);
 		});;
 	}
 }

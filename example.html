@@ -13,24 +13,6 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 		.hidden {
 			visibility: hidden;
 		}
-		.dropdown {
-			position: relative;
-			display: inline-block;
-		}
-		.dropdown-list {
-			display: none;
-			position: absolute;
-			z-index: 1;
-		}
-		.dropdown:hover .dropdown-content {
-			display:block;
-		}
-		.dropdown-content p {
-			display: block;
-		}
-		.dropdown-content p:hover {
-			background-color: #99DDFF;
-		}
 		</style>
 	
 		<title>Example Implementation</title>
@@ -57,29 +39,29 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 		
 		<!-- Status text -->
 		<p id='status-auth'>You are currently signed out. Please sign in!</p>
-		<br>
 		
 		<!-- Sign in/out button -->
 		<button id='toggle-auth' onclick="GVZ.toggleAuth()">Sign In</button>
-		<br>
+		
+		<br><br>
 		
 		<!-- Set of elements shown once authenticated -->
 		<div id='div-choose' class='hidden'>
 			
-			<!-- New database button -->
-			<button onclick='createDatabase();'>New</button>
-			
 			<!-- Dropdown to choose an existing database -->
-			<div class='dropdown'>
-				<!-- Main portion/top of dropdown, shows selected database -->
-				<span id='db-selection'>Select a database:</span>
-				<!-- Dropdown list portion, not yet populated -->
-				<div id='db-list' class='dropdown-content'>
-					<p>Loading databases...</p>
-				</div>
-			</div>
+			<select id='db-selection'>
+				<option value='undefined'>Loading databases...</p>
+			</select>
+			
+			<!-- New database button -->
+			<button onclick='createDatabase();'>+</button>
+			
+			<!-- Confirm database selection -->
+			<button onclick='selectDatabase();'>Go</button>
+			
 		</div>
 		
+		<br><br>
 		
 		<!-- set of elements shown once a database is selected -->
 		<div id='div-interact' class='hidden'>
