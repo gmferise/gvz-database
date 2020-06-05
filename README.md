@@ -126,7 +126,7 @@ To limit the databases the library attempts to load, you can set a database flai
 When a flair is set, any databases created with the library will be given the name `[Flair] My Database` and `GVZ.reloadDatabases()` will only load databases with `[Flair]` at the start of their name (case sensitive, strict match).
 It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
 
-**Function Usage**
+**Example:**
 ```javascript
 // Both pairs of functions will print the same thing.
 // The reload functions are asynchronous and return the up-to-date versions in a promise
@@ -137,22 +137,6 @@ console.log(GVZ.getDatabases());
 
 GVZ.reloadDatabase(id).then(function(database){ console.log(database); });
 console.log(GVZ.getDatabase(id));
-```
-
-**Example:**
-```javascript
-// Populate a dropdown to let user pick a database
-GVZ.setFlair("gvzDB");
-GVZ.reloadDatabases().then(function(databases){
-    let database = databases[0];
-    let dropdown = document.getElementById('db-list');
-    for (let i = 0; i < databases.length; i++){
-        let item = document.createElement('p');
-        item.innerText = databases[i].name;
-        item.setAttribute('onclick','selectDatabase("'+databases[i].id+'")');
-        dropdown.appendChild(item);
-    }
-});
 ```
 
 ### Creating Databases
@@ -189,7 +173,7 @@ let per4 = new GVZ.Database('Period 4',[
         new GVZ.Column('student id','unumber',0)),
         new GVZ.Column('timestamp','datetime')),
         new GVZ.Column('tardy','boolean'))
-    ]//,
+    ])//,
     // could add more tables here
 ]);
 
