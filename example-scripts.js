@@ -13,6 +13,7 @@ function onDocumentReady(){
 	GVZ.setLogging(true); // off by default, useful for debugging	
 	GVZ.setFlair('GVZ'); // you should probably use a flair to limit search
 	GVZ.setAuthListener(authChanged); // set up the listener
+	refreshDatabaseDropdown();
 }
 
 /// **********************
@@ -39,21 +40,21 @@ function refreshDatabaseDropdown(){
 	let master = GVZ.getDatabases();
 	
 	if (master.length > 0){
-		dblist.innerHTML = ''; // remove all children
+		dropdown.innerHTML = ''; // remove all children
 		
 		for (let i = 0; i < master.length; i++){
 			let el = document.createElement('option');
 			el.innerText = master[i].name;
-			el.setAttribute('value',master[i].id);
-			dblist.appendChild(el);
+			el.setAttribute('value', master[i].id);
+			dropdown.appendChild(el);
 		}
 	}
 	else {
-		dblist.innerHTML = '';
+		dropdown.innerHTML = '';
 		let el = document.createElement('option');
 		el.innerText = 'No databases found';
 		el.setAttribute('value','undefined');
-		dblist.appendChild(el);
+		dropdown.appendChild(el);
 	}
 }
 
