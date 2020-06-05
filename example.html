@@ -13,6 +13,24 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 		.hidden {
 			visibility: hidden;
 		}
+		.dropdown {
+			position: relative;
+			display: inline-block;
+		}
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			z-index: 1;
+		}
+		.dropdown-content p {
+			display: block;
+		}
+		.dropdown-content p:hover {
+			background-color: #aaaaff;
+		}
+		.dropdown-content span:hover {
+			display:block;
+		}
 		</style>
 	
 		<title>Example Implementation</title>
@@ -48,7 +66,7 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 			
 			
 			<!-- New database button -->
-			<button onclick='popups.createNewDatabase(true);'>New</button>
+			<button onclick='createDatabase();'>New</button>
 			
 			<!-- Dropdown to choose an existing database -->
 			<div class='dropdown'>
