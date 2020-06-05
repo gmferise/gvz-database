@@ -625,7 +625,7 @@ var GVZ = (function() {
 	class ColumnTemplate {
 		constructor(header, type, decimals){
 			this.header = header;
-			this.datatype = DatatypeTemplate(type, decimals);
+			this.datatype = new DatatypeTemplate(type, decimals);
 		}
 		
 		// Returns if there is a header and a datatype
