@@ -17,19 +17,19 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 			position: relative;
 			display: inline-block;
 		}
-		.dropdown-content {
+		.dropdown {
 			display: none;
 			position: absolute;
 			z-index: 1;
+		}
+		.dropdown:hover {
+			display:block;
 		}
 		.dropdown-content p {
 			display: block;
 		}
 		.dropdown-content p:hover {
 			background-color: #aaaaff;
-		}
-		.dropdown-content span:hover {
-			display:block;
 		}
 		</style>
 	
@@ -56,14 +56,15 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 	<body>
 		
 		<!-- Status text -->
-		<h2 id='status-auth'>You are currently signed out. Please sign in!</h2>
+		<p id='status-auth'>You are currently signed out. Please sign in!</p>
+		<br>
 		
 		<!-- Sign in/out button -->
 		<button id='toggle-auth' onclick="GVZ.toggleAuth()">Sign In</button>
+		<br>
 		
 		<!-- Set of elements shown once authenticated -->
 		<div id='div-choose' class='hidden'>
-			
 			
 			<!-- New database button -->
 			<button onclick='createDatabase();'>New</button>
@@ -71,13 +72,14 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 			<!-- Dropdown to choose an existing database -->
 			<div class='dropdown'>
 				<!-- Main portion/top of dropdown, shows selected database -->
-				<span id='db-selection'>Select a database:</span>
+				<span id='db-selection' class='dropdown-content'>Select a database:</span>
 				<!-- Dropdown list portion, not yet populated -->
 				<div id='db-list' class='dropdown-content'>
 					<p>Loading databases...</p>
 				</div>
 			</div>
-		</div
+		</div>
+		
 		
 		<!-- set of elements shown once a database is selected -->
 		<div id='div-interact' class='hidden'>
