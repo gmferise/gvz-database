@@ -348,7 +348,7 @@ var GVZ = (function() {
 						for (let i = 0; i < response.result.sheets.length; i++){
 							for (let t = 0; t < database.tables.length; t++){
 								if (database.tables[t].name == response.result.sheets[i].properties.title){
-									databases.tables[t].id = response.result.sheets[i].properties.id;
+									database.tables[t].id = response.result.sheets[i].properties.id;
 									break;
 								}
 							}
