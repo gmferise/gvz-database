@@ -157,7 +157,7 @@ Your database *must*:
         * Have a header property defined that is not an empty string
         * Have a datatype defined
 
-Below are examples for making databases taking attendance
+**Examples:**
 ```javascript
 // standard verbose way
 let per3 = new GVZ.Database('Period 3');
@@ -167,7 +167,7 @@ tbl.columns.push(new GVZ.Column('timestamp','datetime'));
 tbl.columns.push(new GVZ.Column('tardy','boolean'));
 db.tables.push(tbl);
 
-// less clear but shorter way
+// shorter way
 let per4 = new GVZ.Database('Period 4',[
     new GVZ.Table('Attendance',[
         new GVZ.Column('student id','unumber',0)),
