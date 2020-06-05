@@ -17,19 +17,19 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 			position: relative;
 			display: inline-block;
 		}
-		.dropdown {
+		.dropdown-list {
 			display: none;
 			position: absolute;
 			z-index: 1;
 		}
-		.dropdown:hover {
+		.dropdown:hover .dropdown-content {
 			display:block;
 		}
 		.dropdown-content p {
 			display: block;
 		}
 		.dropdown-content p:hover {
-			background-color: #aaaaff;
+			background-color: #99DDFF;
 		}
 		</style>
 	
@@ -72,7 +72,7 @@ Also, it's over-commented to make absolutely certain you know what's going on. R
 			<!-- Dropdown to choose an existing database -->
 			<div class='dropdown'>
 				<!-- Main portion/top of dropdown, shows selected database -->
-				<span id='db-selection' class='dropdown-content'>Select a database:</span>
+				<span id='db-selection'>Select a database:</span>
 				<!-- Dropdown list portion, not yet populated -->
 				<div id='db-list' class='dropdown-content'>
 					<p>Loading databases...</p>
