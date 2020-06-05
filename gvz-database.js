@@ -438,18 +438,30 @@ var GVZ = (function() {
 					}
 				}
 				
+				if (newDatabases.length < 1){
+					resolve(databases); // no databases, oh well
+				}
+				
 				// clear databases array and reload each new one
+				// gross because async
 				databases = [];
-				let successes = 0;
+				let requiredSuccesses = newDatabases.length;
 				for (let i = 0; i < newDatabases.length; i++){
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
-						successes++;
-					}).catch(function(error){ // rejected, oh well
-						
+						// after every reload check to see if we did them all
+						if (databases.length >= requiredSuccesses){ 
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							resolve(databases);
+						}
+					}).catch(function(){ // if any reject then ignore them
+						requiredSuccesses--;
+						if (databases.length >= requiredSuccesses){ 
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							resolve(databases);
+						}
 					});
 				}
-				methods.log('Finished reloading all databases. Skipped '+(successes-newDatabases.length)+'/'+newDatabases.length);
-				resolve(databases);
+				
 			});
 		});
 	};
