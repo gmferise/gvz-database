@@ -51,7 +51,7 @@ function refreshDatabaseDropdown(){
 	else {
 		dblist.innerHTML = '';
 		let el = document.createElement('option');
-		el.innerText = No databases found
+		el.innerText = 'No databases found';
 		el.setAttribute('value','undefined');
 		dblist.appendChild(el);
 	}
