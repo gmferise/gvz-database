@@ -5,17 +5,19 @@ var currentDatabase = undefined;
 
 // Sets everything up
 function onDocumentReady(){
+	GVZ.setLogging(true); // off by default, useful for debugging	
+	GVZ.setFlair('GVZ'); // you should probably use a flair to limit search
+	GVZ.setAuthListener(authChanged); // set up the listener
 	// Initialize the GVZ library with our key and client id, keep the user signed in if they have previously
 	GVZ.initialize('AIzaSyCEyNTPq0R6ALudyMMsICNEQLGfD0BnE1M',
 				   '227233657145-chcnqd16a57odfb1e2hqrecnj4ns95g4.apps.googleusercontent.com',
 				    true
-	);
-	GVZ.setLogging(true); // off by default, useful for debugging	
-	GVZ.setFlair('GVZ'); // you should probably use a flair to limit search
-	GVZ.setAuthListener(authChanged); // set up the listener
-	GVZ.reloadDatabases().then(function(){
-		refreshDatabaseDropdown();
+	).then(function(){
+		GVZ.reloadDatabases().then(function(){
+			refreshDatabaseDropdown();
+		});
 	});
+	
 }
 
 /// **********************
