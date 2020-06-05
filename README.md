@@ -83,7 +83,7 @@ GVZ.toggleLogging();
 GVZ.log("This will print to the console.");
 GVZ.setLogging(false);
 GVZ.log("This will not print to the console.");
-GVZ.err('Huston, we have a problem');
+GVZ.err("Huston, we have a problem");
 ```
 
 ### Authenticating
