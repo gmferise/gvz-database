@@ -693,14 +693,17 @@ var GVZ = (function() {
 			}
 			
 			// Look for main commands
-			token = unparsed.shift(0).toUpperCase();
+			let token = unparsed.shift(0).toUpperCase();
 			switch (token){
 				case 'SELECT':
 					GVZ.log(token);
+					break;
 				case 'UPDATE':
 					GVZ.log(token);
+					break;
 				case 'APPEND':
 					GVZ.log(token);
+					break;
 				default:
 					methods.err('Unexpected token "'+token+'" (expected {SELECT|UPDATE|APPEND})');
 			}

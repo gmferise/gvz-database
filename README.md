@@ -3,15 +3,33 @@
 * [Setup](#setup)
     * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
-    * [Initializing the Library](#initializing-the-library)
 
-* [Library Operations](#library-operations)
+* [Operation Examples](#operation-examples)
+    * [Initializing the Library](#initializing-the-library)
     * [Logging and Errors](#logging-and-errors)
-    * [Authenticating](#authenticating)
-    * [Listening for Auth Changes](#listening-for-auth-changes)
-    * [Loading Databases](#loading-databases)
-    * [Creating Databases](#creating-databases)
-    * [Querying Databases](#querying-databases)
+    * [Authenticating](#authenticating) REDO!
+    * [Listening for Auth Changes](#listening-for-auth-changes) REDO!
+    * [Loading Databases](#loading-databases) REDO!
+    * [Creating Databases](#creating-databases) REDO!
+    * [Querying Databases](#querying-databases) REDO!
+	
+* [Library Methods](#library-methods) TODO!
+    * [GVZ.initialize](#gvz-initialize) TODO!
+    * [GVZ.log](#gvz-log) TODO!
+    * [GVZ.setLogging](#gvz-setlogging) TODO!
+    * [GVZ.toggleLogging](#gvz-togglelogging) TODO!
+    * [GVZ.err](#gvz-err) TODO!
+	
+* [Library Classes](#library-classes) TODO!
+    * [Database](#database) TODO!
+    * [Table](#table) TODO!
+    * [Column](#column) TODO!
+    
+* [Reference Objects](#reference-objects) TODO!
+    * [Database Reference](#database-reference) TODO!
+    * [Table Reference)(#table-reference) TODO!
+    * [Column Reference](#column-reference) TODO!
+    * [Datatype Reference](#datatype-reference) TODO!
 
 ## Setup
 
@@ -26,21 +44,15 @@ You will also need to:
 * Make a Client ID with its JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
 * Make an API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
 
+## Library Operations
+
 ### Initializing the Library
-The GVZ library relies on multiple libraries and APIs.
-This is the recommended way of loading them, although other configurations may work as well.
-You must load all the libraries and call `GVZ.initialize()` for every html page in your app.
+The following is the recommended way to initialize the library, although other configurations may also work.
 
-The function call should take the form of `GVZ.initialize(apiKey,clientId,boolean)`.
-The API Key and Client ID should come from the Google Developer Console.
-The boolean determines whether the library will attempt to automatically reauthenticate the user.
-The intended use is to make it false for a page dedicated to signing in so the user can choose which account to use,
-then when you redirect them to the main page you can re-initialize the GVZ library and sign them back in.
-The default value is true.
+Methods used in this example:
+* [GVZ.initialize](#gvz-initialize)
 
-`GVZ.initialize()` returns a promise that is fulfilled when everything is finished loading.
-
-**Example:** 
+**Example:**
 ```html
 <!-- FRONTEND -->
 <head>
@@ -58,36 +70,39 @@ The default value is true.
 /// BACKEND
 function loadGVZ(){
     let apiKey = "THisIsyourAPIKEYFrOmTheGooGleDEvElOpERCoNSoLE";
-    let clientId = "00000000000-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
+    let clientId = "19047580253-tHISiSyoURCLIEntIdfromthesAmEplaCE.apps.googleusercontent.com";
     GVZ.initialize(apiKey,clientId,true).then(function(){
       // do other stuff
     });
 }
 ```
 
-## Library Operations
-
 ### Logging and Errors
 The library comes with its own logging features.
-Any printouts from the library into the console will utilize the function `GVZ.log()` instead of `console.log()`, which only prints to the console when logging is enabled.
-Logging is disabled by default. You can enable it using either `GVZ.setLogging(boolean)` or `GVZ.toggleLogging()`.
+It will throw errors and make debug statements (if enabled) for you, and can also be called manually.
 
-You can use `GVZ.log(string)` within your code to take advantage of the same debugging functionality.
-
-You can also use `GVZ.err(string)` within your own code to throw a GVZ Error if you'd like, although they cannot be disabled.
+Methods used in this example: 
+* [GVZ.log](#gvz-log)
+* [GVZ.setLogging](#gvz-setlogging)
+* [GVZ.toggleLogging](#gvz-togglelogging)
+* [GVZ.err](#gvz-err)
 
 **Example:**
 ```javascript
 GVZ.log("This will not print to the console.");
+
 GVZ.setLogging(true);
 GVZ.log("This will print to the console.");
-GVZ.toggleLogging();
-GVZ.log("This will not print to the console.");
-GVZ.toggleLogging();
-GVZ.log("This will print to the console.");
+
 GVZ.setLogging(false);
 GVZ.log("This will not print to the console.");
+
+GVZ.toggleLogging();
+GVZ.log("This will print to the console.");
+
 GVZ.err("Huston, we have a problem");
+
+GVZ.log("This will not print to the console as the program halts upon the exception.");
 ```
 
 ### Authenticating
@@ -188,7 +203,3 @@ GVZ.createDatabase(per3).then(function(newDatabase){
     });
 });
 ```
-
-
-
-### Querying Databases
