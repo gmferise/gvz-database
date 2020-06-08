@@ -161,6 +161,11 @@ var GVZ = (function() {
 		return undefined;
 	}
 	
+	// Identifies the datatype of an input
+	function parseDatatype(input){
+		return input;
+	}
+	
 	// Checks whether requirements for running a method are met
 	// Always requires gapi and GoogleAuth to be loaded
 	// requireAuth (optional) true requires user to be signed in with GoogleAuth
@@ -679,15 +684,15 @@ var GVZ = (function() {
 		query(string){
 			checkReqs(true);
 			if (databases.length === 0){ methods.err('No databases loaded. Try GVZ.reloadDatabases()'); }
-			if (this.isUnbound()){ methods.err('Table was never bound to its online counterpart'); }
-			if (!(this.hasParent())){ methods.err('Table is not attached to a database'); }
 			
-			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split by it
-			// remove any "" caused by leading/trailing whitespace
+			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split it into tokens
+			
+			// remove any "" tokens caused by leading/trailing whitespace
 			for (let i = 0; i < unparsed.length; i++){
 				if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
-			}	
-			// Look for commands
+			}
+			
+			// Look for main commands
 			token = unparsed.shift(0).toUpperCase();
 			switch (token){
 				case 'SELECT':
@@ -717,10 +722,13 @@ var GVZ = (function() {
 				this.decimals = decimals;
 			}
 		}
+		
+		isNumeric(){
+			return this.decimals !== undefined;
+		}
 	}
 
-	// Include classes in public methods
-	// Annoying to reference as methods.Class so done last
+	// Include template versions in public stuff
 	methods.Database = DatabaseTemplate;
 	methods.Table = TableTemplate;
 	methods.Column = ColumnTemplate;
