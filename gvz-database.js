@@ -348,7 +348,7 @@ var GVZ = (function() {
 						for (let i = 0; i < response.result.sheets.length; i++){
 							for (let t = 0; t < database.tables.length; t++){
 								if (database.tables[t].name == response.result.sheets[i].properties.title){
-									database.tables[t].id = response.result.sheets[i].properties.id;
+									database.tables[t].id = response.result.sheets[i].properties.sheetId;
 									break;
 								}
 							}
@@ -488,8 +488,8 @@ var GVZ = (function() {
 				let ranges = []; // header and datatype rows to check
 				
 				for (let i = 0; i < sheets.length; i++){
-					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId, []);
-					database.tables.push(table);
+					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId);
+					database.pushTable(table);
 					ranges.push(sheets[i].properties.title+'!1:2');
 				}
 				
@@ -645,16 +645,16 @@ var GVZ = (function() {
 	}
 	
 	class Database {
-		constructor(name, id, tables){
+		constructor(name, id){
 			this.name = name;
 			this.id = id;
-			this.tables = (tables === undefined) ? [] : tables;
-			// Bind tables to database
-			if (this.tables !== undefined){
-				for (let i = 0; i < this.tables.length; i++){
-					this.tables[i].parentId = this.id;
-				}
-			}
+			this.tables = [];
+		}
+		
+		// push tables, only use method
+		pushTable(table){
+			table.parentId = this.id;
+			this.tables.push(table);
 		}
 		
 		// Returns table object given id or undefined
