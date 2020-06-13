@@ -298,7 +298,7 @@ var GVZ = (function() {
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
 		methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
-		if (!(database.isValid())){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
+		if (!database.isValid()){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
 		
 		// Clone database template object so we can modify it
 		database = JSON.parse(JSON.stringify(database));
@@ -581,7 +581,7 @@ var GVZ = (function() {
 	methods.clearFlair = function(){
 		flair = "";
 	};
-		
+
 	/// ***********
 	/// * CLASSES *
 	/// ***********
@@ -602,7 +602,7 @@ var GVZ = (function() {
 			let names = [];
 			for (let i = 0; i < this.tables.length; i++){
 				names.push(this.tables[i].name);
-				if (!(this.tables[i].isValid())){
+				if (!this.tables[i].isValid()){
 					return false;
 				}
 			}
@@ -619,7 +619,7 @@ var GVZ = (function() {
 		// Checks if table has valid columns
 		isValid(){
 			for (let i = 0; i < this.columns.length; i++){
-				if (!(this.columns[i].isValid())){
+				if (!this.columns[i].isValid()){
 					return false;
 				}
 			}
@@ -641,7 +641,7 @@ var GVZ = (function() {
 	
 	class DatatypeTemplate {
 		constructor(type, decimals){
-			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
+			if (!type in datatypes){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
 			this.type = type;
 			if (decimals !== undefined){
 				this.decimals = decimals;
@@ -678,35 +678,38 @@ var GVZ = (function() {
 			this.columns = (columns === undefined) ? [] : columns;
 			this.parentId = undefined;
 		}
+        
+        // Turns an array into a valid row for this table
+        parseRowdata(arr){
+            if (arr.length !== this.columns.length) { return undefined; }
+            for (let i = 0; i < arr.length; i++){
+                if (!this.columns[i].validValue(arr[i])){
+                    return undefined;
+                }
+            }
+            return arr;
+        }
 		
 		// ASYNC RETURN!
-		// Main query function
-		query(string){
+		// Pushes rowdata in array to end of table
+        push(arr){
 			checkReqs(true);
-			if (databases.length === 0){ methods.err('No databases loaded. Try GVZ.reloadDatabases()'); }
-			
-			let unparsed = string.split(/[\s\n]+/); // merge all whitespace and split it into tokens
-			
-			// remove any "" tokens caused by leading/trailing whitespace
-			for (let i = 0; i < unparsed.length; i++){
-				if (unparsed[i] == "") { unparsed.splice(i,1); i--; }
-			}
-			
-			// Look for main commands
-			let token = unparsed.shift(0).toUpperCase();
-			switch (token){
-				case 'SELECT':
-					GVZ.log(token);
-					break;
-				case 'UPDATE':
-					GVZ.log(token);
-					break;
-				case 'APPEND':
-					GVZ.log(token);
-					break;
-				default:
-					methods.err('Unexpected token "'+token+'" (expected {SELECT|UPDATE|APPEND})');
-			}
+            let rowdata = this.parseRowdata(arr);
+            if (rowdata === undefined){ methods.err('Malformed rowdata'); }
+            
+            return new Promise(function(resolve,reject){
+                gapi.client.sheets.spreadsheets.values.append({
+                    'spreadsheetId': this.parentId,
+                    'range': this.name+'!'+'A:'+indexToLetter(this.columns.length),
+                    'valueInputOption': 'USER_ENTERED',
+                    'resource': {
+                        'values': rowdata
+                    }
+                }).then(function(response){
+                    if (response.status == 200){ reject(response); }
+                    resolve();
+                });
+            });
 		}
 	}
 	
@@ -715,19 +718,38 @@ var GVZ = (function() {
 			this.header = header;
 			this.datatype = datatype;
 		}
+        
+        validValue(value){
+            switch (this.datatype.type){
+                case 'string':
+                    return true;
+                case 'number':
+                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/);
+                case 'unumber':
+                    return value.toString().match(/^-?[0123456789]+(\.[0123456789]+)?$/);
+                case 'date':
+                    return value instanceof Date;
+                case 'time':
+                    return value instanceof Date;
+                case 'datetime':
+                    return value instanceof Date;
+                case 'duration':
+                    return value instanceof Date;
+                case 'boolean':
+                    return typeof(value) == 'boolean' || value === 'true' || value === 'false';
+                default:
+                    return false;
+            }
+        }
 	}
 	
 	class Datatype {
 		constructor(type, decimals){
-			if (!(type in datatypes)){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
+			if (!type in datatypes){ methods.err('Unknown type "'+type+'", expected {string|number|unumber|date|time|datetime|duration|boolean}'); }
 			this.type = type;
 			if (decimals !== undefined){
 				this.decimals = decimals;
 			}
-		}
-		
-		isNumeric(){
-			return this.decimals !== undefined;
 		}
 	}
 

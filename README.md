@@ -1,17 +1,15 @@
+# About
+This is a JavaScript library that makes using Google's Sheets and Drive JavaScript APIs
+easier to use for managing a spreadsheet like a database. The APIs rely on making JSON
+requests which is flexible but messy for such a purpose. This library compresses down
+features of the API allowing a cleaner application to be built using them.
+
 # Documentation Contents
 
 * [Setup](#setup)
     * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
-
-* [Operation Examples](#operation-examples)
     * [Initializing the Library](#initializing-the-library)
-    * [Logging and Errors](#logging-and-errors)
-    * [Authenticating](#authenticating) REDO!
-    * [Listening for Auth Changes](#listening-for-auth-changes) REDO!
-    * [Loading Databases](#loading-databases) REDO!
-    * [Creating Databases](#creating-databases) REDO!
-    * [Querying Databases](#querying-databases) REDO!
 	
 * [Library Methods](#library-methods) TODO!
     * [GVZ.initialize](#gvz-initialize) TODO!
@@ -20,16 +18,19 @@
     * [GVZ.toggleLogging](#gvz-togglelogging) TODO!
     * [GVZ.err](#gvz-err) TODO!
 	
-* [Library Classes](#library-classes) TODO!
-    * [Database](#database) TODO!
-    * [Table](#table) TODO!
-    * [Column](#column) TODO!
-    
+* [Constructable Objects](#constructable-objects) TODO!
+    * [GVZ.Database](#gvz-database) TODO!
+    * [GVZ.Table](#gvz-table) TODO!
+    * [GVZ.Column](#gvz-column) TODO!
+
 * [Reference Objects](#reference-objects) TODO!
-    * [Database Reference](#database-reference) TODO!
-    * [Table Reference)(#table-reference) TODO!
-    * [Column Reference](#column-reference) TODO!
-    * [Datatype Reference](#datatype-reference) TODO!
+    * [Database](#database-reference) TODO!
+    * [Table](#table-reference) TODO!
+    * [Column](#column-reference) TODO!
+    * [Datatype](#datatype-reference) TODO!
+    * [Selection](#selection-reference) TODO!
+    
+
 
 ## Setup
 
@@ -44,12 +45,10 @@ You will also need to:
 * Make a Client ID with its JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
 * Make an API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
 
-## Library Operations
-
 ### Initializing the Library
 The following is the recommended way to initialize the library, although other configurations may also work.
 
-Methods used in this example:
+**Related Methods:**
 * [GVZ.initialize](#gvz-initialize)
 
 **Example:**
@@ -81,7 +80,7 @@ function loadGVZ(){
 The library comes with its own logging features.
 It will throw errors and make debug statements (if enabled) for you, and can also be called manually.
 
-Methods used in this example: 
+**Related Methods:**
 * [GVZ.log](#gvz-log)
 * [GVZ.setLogging](#gvz-setlogging)
 * [GVZ.toggleLogging](#gvz-togglelogging)
@@ -89,24 +88,30 @@ Methods used in this example:
 
 **Example:**
 ```javascript
-GVZ.log("This will not print to the console.");
+GVZ.log("Logging is off by default, this will not print");
 
 GVZ.setLogging(true);
-GVZ.log("This will print to the console.");
+GVZ.log("You can enable it though, now this prints!");
 
 GVZ.setLogging(false);
-GVZ.log("This will not print to the console.");
+GVZ.log("Of course, you can turn it off too. This doesn't print.");
 
 GVZ.toggleLogging();
-GVZ.log("This will print to the console.");
+GVZ.log("There's also a toggle function if you need it. Printing again!");
 
 GVZ.err("Huston, we have a problem");
 
-GVZ.log("This will not print to the console as the program halts upon the exception.");
+GVZ.log("This will not print, the program halts first.");
 ```
 
 ### Authenticating
-There are multiple functions that deal with the authentication status.
+The library requires very little of you to allow the user to authenticate with their Google account.
+
+**Related Methods:**
+* [GVZ.signIn](#gvz-signin)
+* [GVZ.signOut](#gvz-signout)
+* [GVZ.toggleAuth](#gvz-toggleauth)
+* [GVZ.isAuth](#gvz-isauth)
 
 `GVZ.toggleAuth()` is most useful as a button function and will sign in or sign out the user appropriately.
 
