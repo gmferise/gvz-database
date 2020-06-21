@@ -697,10 +697,15 @@ var GVZ = (function() {
             let rowdata = this.parseRowdata(arr);
             if (rowdata === undefined){ methods.err('Malformed rowdata'); }
             
+            // Prepare any properties since this object becomes unaccessable in the promise
+            let parentId = this.parentId;
+            let name = this.name;
+            let width = this.columns.length;
+            
             return new Promise(function(resolve,reject){
                 gapi.client.sheets.spreadsheets.values.append({
-                    'spreadsheetId': this.parentId,
-                    'range': this.name+'!'+'A:'+indexToLetter(this.columns.length),
+                    'spreadsheetId': parentId,
+                    'range': name+'!'+'A:'+indexToLetter(width),
                     'valueInputOption': 'USER_ENTERED',
                     'resource': {
                         'values': rowdata
