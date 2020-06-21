@@ -682,12 +682,15 @@ var GVZ = (function() {
         // Turns an array into a valid row for this table
         parseRowdata(arr){
             if (arr.length !== this.columns.length) { return undefined; }
+            
+            let out = [];
             for (let i = 0; i < arr.length; i++){
-                if (!this.columns[i].validValue(arr[i])){
-                    return undefined;
+                let v = this.validateValue(this.columns[i],arr[i]);
+                if (v === undefined){
+                    return undefined
                 }
             }
-            return arr;
+            return out;
         }
 		
 		// ASYNC RETURN!
@@ -724,26 +727,26 @@ var GVZ = (function() {
 			this.datatype = datatype;
 		}
         
-        validValue(value){
+        validateValue(value){
             switch (this.datatype.type){
                 case 'string':
-                    return true;
+                    return value.toString();
                 case 'number':
-                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/);
+                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
                 case 'unumber':
-                    return value.toString().match(/^-?[0123456789]+(\.[0123456789]+)?$/);
+                    return value.toString().match(/^-?[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
                 case 'date':
-                    return value instanceof Date;
+                    return value instanceof Date ? isoDate(value) : undefined;
                 case 'time':
-                    return value instanceof Date;
+                    return value instanceof Date ? isoTime(value) : undefined;
                 case 'datetime':
-                    return value instanceof Date;
+                    return value instanceof Date ? isoDateTime(value) : undefined;
                 case 'duration':
-                    return value instanceof Date;
+                    return value instanceof Date ? isoDuration(value) : undefined;
                 case 'boolean':
                     return typeof(value) == 'boolean' || value === 'true' || value === 'false';
                 default:
-                    return false;
+                    return undefined;
             }
         }
 	}
@@ -768,11 +771,28 @@ var GVZ = (function() {
 	
 })();
 
-// Converts a date object into localized time ISO
 // YYYY-MM-DD HH:MM:SS
-function isoDate(dateObj){
-	return dateObj.getFullYear()+"-"+padZeroes(2,dateObj.getMonth()+1)+"-"+padZeroes(2,dateObj.getDate())+" "+padZeroes(2,dateObj.getHours())+":"+padZeroes(2,dateObj.getMinutes())+":"+padZeroes(2,dateObj.getSeconds());
+function isoDateTime(dateObj){
+	return isoDate(dateObj)+' '+isoTime(dateObj);
 }
+
+// YYY-MM-DD
+function isoDate(dateObj){
+	return dateObj.getFullYear()+'-'+padZeroes(2,dateObj.getMonth()+1)+'-'+padZeroes(2,dateObj.getDate())
+}
+
+// HH:MM:SS
+function isoTime(dateObj){
+	return padZeroes(2,dateObj.getHours())+':'+padZeroes(2,dateObj.getMinutes())+':'+padZeroes(2,dateObj.getSeconds());
+}
+// HH+:MM:SS
+function isoDuration(dateObj){
+    let ms = dateObj.getTime();
+    return padZeroes(2,Math.floor(ms/(1000*60*60))) +':'+ padZeroes(2,Math.floor(ms/(1000*60)) % 60) +':'+ padZeroes(2,Math.floor(ms/1000) % 60);
+}
+
+// Index to letter
+/// TODO
 
 // Pads a number to match the desired length
 function padZeroes(width, num){
