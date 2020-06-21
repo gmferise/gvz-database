@@ -687,7 +687,10 @@ var GVZ = (function() {
             for (let i = 0; i < arr.length; i++){
                 let v = this.columns[i].validateValue(arr[i]);
                 if (v === undefined){
-                    return undefined
+                    return undefined;
+                }
+                else {
+                    out.push(v);
                 }
             }
             return out;
