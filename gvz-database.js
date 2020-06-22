@@ -681,13 +681,13 @@ var GVZ = (function() {
         
         // Turns an array into a valid row for this table
         parseRowdata(arr){
-            if (arr.length !== this.columns.length) { return undefined; }
+            if (arr.length !== this.columns.length) { methods.err('Row length does not match number of columns in table ('+arr.length+' != '+this.columns.length+')'); }
             
             let out = [];
             for (let i = 0; i < arr.length; i++){
                 let v = this.columns[i].validateValue(arr[i]);
                 if (v === undefined){
-                    return undefined;
+                    methods.err('Cell datatype does not match expected type for row ("'+arr[i]+'" is not a '+this.columns[i].datatype.type+')');
                 }
                 else {
                     out.push(v);
@@ -701,7 +701,6 @@ var GVZ = (function() {
         push(arr){
 			checkReqs(true);
             let rowdata = this.parseRowdata(arr);
-            if (rowdata === undefined){ methods.err('Malformed rowdata'); }
             
             // Prepare any properties since this object becomes unaccessable in the promise
             let parentId = this.parentId;
@@ -724,6 +723,35 @@ var GVZ = (function() {
                 });
             });
 		}
+        
+        // ASYNC RETURN!
+		// Pushes rowdata in array to end of table
+        pushMany(nestedArr){
+            checkReqs(true);
+            let rowdata = [];
+            for (let i = 0; i < nestedArr; i++){
+                rowdata.push(this.parseRowdata(arr[i]););
+            }
+            
+            // Prepare any properties since this object becomes unaccessable in the promise
+            let parentId = this.parentId;
+            let name = this.name;
+            let width = this.columns.length;
+            
+            return new Promise(function(resolve,reject){
+                gapi.client.sheets.spreadsheets.values.append({
+                    'spreadsheetId': parentId,
+                    'range': name+'!'+'A:'+indexToLetter(width),
+                    'valueInputOption': 'USER_ENTERED',
+                    'resource': {
+                        'values': rowdata
+                    }
+                }).then(function(response){
+                    if (response.status != 200){ reject(response); }
+                    resolve();
+                });
+            });
+        }
 	}
 	
 	class Column {
