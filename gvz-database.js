@@ -730,7 +730,7 @@ var GVZ = (function() {
             checkReqs(true);
             let rowdata = [];
             for (let i = 0; i < nestedArr; i++){
-                rowdata.push(this.parseRowdata(arr[i]););
+                rowdata.push(this.parseRowdata(arr[i]));
             }
             
             // Prepare any properties since this object becomes unaccessable in the promise
