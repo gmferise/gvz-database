@@ -765,7 +765,7 @@ var GVZ = (function() {
                 case 'string':
                     return value.toString();
                 case 'number':
-                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/) ? : undefined;
+                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
                 case 'unumber':
                     return value.toString().match(/^-?[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
                 case 'date':
