@@ -714,10 +714,12 @@ var GVZ = (function() {
                     'range': name+'!'+'A:'+indexToLetter(width),
                     'valueInputOption': 'USER_ENTERED',
                     'resource': {
-                        'values': rowdata
+                        'values': [
+                            rowdata
+                        ]
                     }
                 }).then(function(response){
-                    if (response.status == 200){ reject(response); }
+                    if (response.status != 200){ reject(response); }
                     resolve();
                 });
             });
@@ -735,7 +737,7 @@ var GVZ = (function() {
                 case 'string':
                     return value.toString();
                 case 'number':
-                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
+                    return value.toString().match(/^[0123456789]+(\.[0123456789]+)?$/) ? : undefined;
                 case 'unumber':
                     return value.toString().match(/^-?[0123456789]+(\.[0123456789]+)?$/) ? value : undefined;
                 case 'date':
@@ -747,7 +749,7 @@ var GVZ = (function() {
                 case 'duration':
                     return value instanceof Date ? isoDuration(value) : undefined;
                 case 'boolean':
-                    return typeof(value) == 'boolean' || value === 'true' || value === 'false';
+                    return typeof(value) == 'boolean' || value === 'true' || value === 'false' ? value.toString() : undefined;
                 default:
                     return undefined;
             }
@@ -774,7 +776,7 @@ var GVZ = (function() {
 	
 })();
 
-// YYYY-MM-DD HH:MM:SS
+// YYYY-MM-DD HH:MM:SS.sss
 function isoDateTime(dateObj){
 	return isoDate(dateObj)+' '+isoTime(dateObj);
 }
@@ -784,14 +786,14 @@ function isoDate(dateObj){
 	return dateObj.getFullYear()+'-'+padZeroes(2,dateObj.getMonth()+1)+'-'+padZeroes(2,dateObj.getDate())
 }
 
-// HH:MM:SS
+// HH:MM:SS.sss
 function isoTime(dateObj){
-	return padZeroes(2,dateObj.getHours())+':'+padZeroes(2,dateObj.getMinutes())+':'+padZeroes(2,dateObj.getSeconds());
+	return padZeroes(2,dateObj.getHours())+':'+padZeroes(2,dateObj.getMinutes())+':'+padZeroes(2,dateObj.getSeconds())+'.'+padZeroes(3,dateObj.getMilliseconds());
 }
-// HH+:MM:SS
+// HH+:MM:SS.sss
 function isoDuration(dateObj){
     let ms = dateObj.getTime();
-    return padZeroes(2,Math.floor(ms/(1000*60*60)))+':'+padZeroes(2,Math.floor(ms/(1000*60)) % 60)+':'+padZeroes(2,Math.floor(ms/1000) % 60);
+    return padZeroes(2,Math.floor(ms/(1000*60*60)))+':'+padZeroes(2,Math.floor(ms/(1000*60)) % 60)+':'+padZeroes(2,Math.floor(ms/1000) % 60+'.'+padZeroes(3,ms % 1000);
 }
 
 // Index to letter
