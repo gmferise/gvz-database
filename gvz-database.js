@@ -795,7 +795,16 @@ function isoDuration(dateObj){
 }
 
 // Index to letter
-/// TODO
+function indexToLetter(num){
+	let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	out = letters[num % 26];
+	num = Math.floor(num/26)-1;
+	while (num > 0){
+		out = letters[num % 26] + out;
+		num = Math.floor(num/26);
+	}
+	return out;
+}
 
 // Pads a number to match the desired length
 function padZeroes(width, num){
