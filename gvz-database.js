@@ -791,19 +791,27 @@ function isoTime(dateObj){
 // HH+:MM:SS
 function isoDuration(dateObj){
     let ms = dateObj.getTime();
-    return padZeroes(2,Math.floor(ms/(1000*60*60))) +':'+ padZeroes(2,Math.floor(ms/(1000*60)) % 60) +':'+ padZeroes(2,Math.floor(ms/1000) % 60);
+    return padZeroes(2,Math.floor(ms/(1000*60*60)))+':'+padZeroes(2,Math.floor(ms/(1000*60)) % 60)+':'+padZeroes(2,Math.floor(ms/1000) % 60);
 }
 
 // Index to letter
 function indexToLetter(num){
+    /*
+   Counts basically like this but with 26 chars:
+    0  1  2  3  4  5  6  7  8  9
+   00 01 02 03 04 05 06 07 08 09
+   10 11 12 13 14 15 16 17 18 19
+   ...
+    90  91  92  93  94  95  96  97  98  99
+   000 001 002 003 004 005 006 007 008 009
+   */
+   
 	let letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-	out = letters[num % 26];
-	num = Math.floor(num/26)-1;
-	while (num > 0){
-		out = letters[num % 26] + out;
-		num = Math.floor(num/26);
-	}
-	return out;
+    let out = letters[num % 26];
+    for (let i = 0; num >= 26*(27**i); i++){
+        out = letters[(Math.floor(num/(26*27**i))-1) % 26] + out;
+    }
+    return out;    
 }
 
 // Pads a number to match the desired length
