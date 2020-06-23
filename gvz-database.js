@@ -729,7 +729,7 @@ var GVZ = (function() {
         pushMany(nestedArr){
             checkReqs(true);
             let rowdata = [];
-            for (let i = 0; i < nestedArr; i++){
+            for (let i = 0; i < nestedArr.length; i++){
                 rowdata.push(this.parseRowdata(arr[i]));
             }
             
