@@ -821,7 +821,7 @@ function isoTime(dateObj){
 // HH+:MM:SS.sss
 function isoDuration(dateObj){
     let ms = dateObj.getTime();
-    return padZeroes(2,Math.floor(ms/(1000*60*60)))+':'+padZeroes(2,Math.floor(ms/(1000*60)) % 60)+':'+padZeroes(2,Math.floor(ms/1000) % 60+'.'+padZeroes(3,ms % 1000);
+    return padZeroes(2,Math.floor(ms/(1000*60*60)))+':'+padZeroes(2,Math.floor(ms/(1000*60)) % 60)+':'+padZeroes(2,Math.floor(ms/1000) % 60)+'.'+padZeroes(3,ms % 1000);
 }
 
 // Index to letter
