@@ -270,7 +270,7 @@ See the [Google Documentation](https://developers.google.com/identity/sign-in/we
 for more detail.
 
 ## GVZ.toggleAuth
-Changes the authentication status by calling either `GVZ.signOut()` or `GVZ.signIn()` accordingly
+Changes the authentication status by calling either[GVZ.signOut](#gvzsignout) or [GVZ.signIn](#gvzsignin) accordingly
 
 **Inputs:**
 Nothing
@@ -299,7 +299,7 @@ An Object
 
 # Managing Databases
 
-# GVZ.setFlair
+## GVZ.setFlair
 Sets the flair used to make new spreadsheets and filter through existing ones.
 Flairs appear visually as `[YourFlair] DatabaseName` where the actual flair set is `YourFlair`.
 
@@ -311,7 +311,7 @@ Flairs appear visually as `[YourFlair] DatabaseName` where the actual flair set 
 **Outputs:**
 Nothing
 
-# GVZ.getFlair
+## GVZ.getFlair
 Returns the current flair
 
 **Inputs:**
@@ -323,7 +323,7 @@ A Value
 | :------- | :---------- |
 | string   | The current flair |
 
-# GVZ.clearFlair
+## GVZ.clearFlair
 Resets the current flair
 
 **Inputs:**
@@ -332,7 +332,7 @@ Nothing
 **Outputs:**
 Nothing
 
-# GVZ.reloadDatabases
+## GVZ.reloadDatabases
 Asynchronously reloads all the spreadsheets from the user's Google Drive that have the current flair
 
 **Inputs:**
@@ -350,7 +350,7 @@ A Promise
 | Resolved | The newly loaded databases | 
 | Rejected | Error message |
 
-# GVZ.reloadDatabase
+## GVZ.reloadDatabase
 Asynchronously reloads a single spreadsheet from its spreadsheet ID regardless of flair
 
 **Inputs:**
@@ -365,7 +365,7 @@ A Promise
 | Resolved | The new [Database Reference Object](#database-reference)| 
 | Rejected | Error message |
 
-# GVZ.getDatabases
+## GVZ.getDatabases
 Returns an array of all loaded [Database Reference Objects](#database-reference)
 
 **Inputs:**
@@ -377,7 +377,7 @@ A Value
 | :------- | :---------- |
 | array    | All loaded [Database Reference Objects](#database-reference) |
 
-# GVZ.getDatabase
+## GVZ.getDatabase
 Returns a single [Database Reference Object](#database-reference) that matches the given spreadsheet ID
 
 **Inputs:**
@@ -388,7 +388,7 @@ Returns a single [Database Reference Object](#database-reference) that matches t
 **Outputs:**
 A [Database Reference Object](#database-reference)
 
-# GVZ.isDatabase
+## GVZ.isDatabase
 Returns whether a given spreadsheet ID is in the loaded databases
 
 **Inputs:**
@@ -402,7 +402,7 @@ A Value
 | :------- | :---------- |
 | boolean  | Whether the parameter is a loaded database |
 
-# GVZ.createDatabase
+## GVZ.createDatabase
 Creates a spreadsheet with the current flair and loads it as a database given a [Database Template Object](#database-template)
 
 **Inputs:**
