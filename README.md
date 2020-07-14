@@ -6,38 +6,57 @@ features of the API allowing a cleaner application to be built using them.
 
 # Documentation Contents
 
-* [Setup](#setup)
+* [Getting Started](#getting-started)
     * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
     * [Initializing the Library](#initializing-the-library)
-	
-* [Library Methods](#library-methods) TODO!
-    * [GVZ.initialize](#gvz-initialize) TODO!
-    * [GVZ.log](#gvz-log) TODO!
-    * [GVZ.setLogging](#gvz-setlogging) TODO!
-    * [GVZ.toggleLogging](#gvz-togglelogging) TODO!
-    * [GVZ.err](#gvz-err) TODO!
-	
-* [Constructable Objects](#constructable-objects) TODO!
-    * [GVZ.Database](#gvz-database) TODO!
-    * [GVZ.Table](#gvz-table) TODO!
-    * [GVZ.Column](#gvz-column) TODO!
+    * [Promises](#promises)
 
-* [Reference Objects](#reference-objects) TODO!
-    * [Database](#database-reference) TODO!
-    * [Table](#table-reference) TODO!
-    * [Column](#column-reference) TODO!
-    * [Datatype](#datatype-reference) TODO!
-    * [Selection](#selection-reference) TODO!
+* [Basic Methods](#basic-methods)
+    * [GVZ.log](#gvz-log)
+    * [GVZ.setLogging](#gvz-setlogging)
+    * [GVZ.toggleLogging](#gvz-togglelogging)
+    * [GVZ.err](#gvz-err)
+    * [GVZ.initialize](#gvz-initialize)
     
+* [Handling Authentication](#handling-authentication)
+    * [GVZ.setAuthListener](#gvz-setauthlistener)
+    * [GVZ.clearAuthListener](#gvz-clearauthlistener)
+    * [GVZ.isAuth](#gvz-isauth)
+    * [GVZ.signIn](#gvz-signin)
+    * [GVZ.signOut](#gvz-signout)
+    * [GVZ.toggleAuth](#gvz-toggleauth)
+    * [GVZ.getUserInfo](#gvz-getuserinfo)
+    
+* [Managing Databases](#managing-databases)
+    * [GVZ.setFlair](#gvz-setflair)
+    * [GVZ.getFlair](#gvz-getflair)
+    * [GVZ.clearFlar](#gvz-clearflair)
+    * [GVZ.reloadDatabases](#gvz-reloaddatabases)
+    * [GVZ.reloadDatabase](#gvz-reloaddatabase)
+    * [GVZ.getDatabases](#gvz-getdatabases)
+    * [GVZ.getDatabase](#gvz-getdatabase)
+    * [GVZ.isDatabase](#gvz-isdatabase)
+    * [GVZ.createDatabase](#gvz-createdatabase)
+	
+* [Constructable Objects](#constructable-objects)
+    * [GVZ.Database](#gvz-database)
+    * [GVZ.Table](#gvz-table)
+    * [GVZ.Column](#gvz-column)
 
+* [Reference Objects](#reference-objects)
+    * [Database](#database-reference)
+    * [Table](#table-reference)
+    * [Column](#column-reference)
+    * [Datatype](#datatype-reference)
+    * [Selection](#selection-reference)
 
-## Setup
+# Getting Started
 
-### Installation
+## Installation
 [Download the latest version](https://github.com/gmferise/gvz-database/releases) of `gvz-database.js` and put it in your project folder.
 
-### Google Developer Console Config
+## Google Developer Console Config
 Before you can use this library, you should make a [Google API Project](https://console.developers.google.com/).
 You will also need to:
 * Enable the [Google Drive API](https://console.developers.google.com/apis/library/drive.googleapis.com?id=e44a1596-da14-427c-9b36-5eb6acce3775) and [Google Sheets API](https://console.developers.google.com/apis/library/sheets.googleapis.com?id=739c20c5-5641-41e8-a938-e55ddc082ad1) for your project in the API Library.
@@ -45,8 +64,8 @@ You will also need to:
 * Make a Client ID with its JavaScript Origin URI set to whatever website will be hosting your app. (Mine is `https://gmferise.github.io`)
 * Make an API Key that is (preferrably) restricted to the Sheets and Drive APIs and with a website restriction set. (Mine is `https://gmferise.github.io/*` for this one)
 
-### Initializing the Library
-The following is the recommended way to initialize the library, although other configurations may also work.
+## Initializing the Library
+The following is the most basic way to initialize the library, although other configurations may also work.
 
 **Related Methods:**
 * [GVZ.initialize](#gvz-initialize)
@@ -76,9 +95,340 @@ function loadGVZ(){
 }
 ```
 
+## The Promise Object
+Many of the methods in this library will return a JavaScript Promise object.
+
+These articles on 
+[using promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Using_promises)
+and
+[promise functionality](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+do a great job of explaining how they work.
+
+# Basic Methods
+
+<!--
+Description
+
+**Inputs:**
+Nothing
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| string    | string  | No       | The message to log to the console |
+
+**Outputs:**
+Nothing
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| boolean  | The current authentication state |
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Error message |
+An Object
+| Property  | Type   | Description |
+| :-------- | :----- | :---------- |
+| firstName | string | The user's first (given) name |
+| lastName  | string | The user's last (family) name |
+| email     | string | The user's email address |
+| picture   | string | The URL for the user's profile picture |
+-->
+    
+## GVZ.log
+Sends a message to the console if logging is enabled
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| string    | string  | No       | The message to log to the console |
+
+**Outputs:**
+Nothing
+
+## GVZ.setlogging
+Enables or disables logging
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| bool      | boolean | No       | New state of logging switch |
+
+**Outputs:**
+Nothing
+
+## GVZ.togglelogging
+Toggles logging on or off
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| boolean  | The new state of logging switch |
+
+## GVZ.err
+Meant for internal use, but can be used externally. Throws an error headed by "GVZ Error:"
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| string    | string  | No       | The error message to throw |
+
+**Outputs:**
+Nothing
+
+## GVZ.initialize
+Initializes the library and a Google Auth instance using your API key and client ID.
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| apiKey    | string  | No       | Your API key from the Google Developer Console |
+| clientId  | string  | No       | Your client ID from the Google Developer Console |
+| keepAuth  | boolean | Yes      | Whether the library should attempt to automatically authenticate the user. Useful to keep user signed in when visiting a different HTML page on your site |
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Error message |
+
+# Handling Authentication
+
+## GVZ.setAuthListener
+Assigns a function to become the callback for a change in auth status.
+Upon changes in auth status, the callback will recieve the new auth status as input.
+
+**Inputs:**
+| Parameter | Type      | Optional | Description |
+| :-------- | :-------- | :------- | :---------- |
+| callback  | function  | No       | The function to execute upon change in auth status. |
+
+The input signature of the callback function should be as follows:
+| Parameter | Type     | Optional |
+| :-------- | :------- | :------- |
+| newStatus | boolean  | No       |
+
+**Outputs:**
+Nothing
+
+## GVZ.clearAuthListener
+Disconnects your callback function
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+Nothing
+
+## GVZ.isAuth
+Returns the current auth status
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| boolean  | The current authentication state |
+
+## GVZ.signIn
+Attempts to sign in the user using the Google Sign-In popup
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Object containing error message |
+
+See the [Google Documentation](https://developers.google.com/identity/sign-in/web/reference#googleauthsignin)
+for more detail.
+
+## GVZ.signOut
+Returns a Promise that is fulfilled when the user is signed out
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Object containing error message |
+
+See the [Google Documentation](https://developers.google.com/identity/sign-in/web/reference#googleauthsignout)
+for more detail.
+
+## GVZ.toggleAuth
+Changes the authentication status by calling either `GVZ.signOut()` or `GVZ.signIn()` accordingly
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Object containing error message |
+
+## GVZ.getUserInfo
+Returns info about the authenticated user, or undefined
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+An Object
+| Property  | Type   | Description |
+| :-------- | :----- | :---------- |
+| firstName | string | The user's first (given) name |
+| lastName  | string | The user's last (family) name |
+| email     | string | The user's email address |
+| picture   | string | The URL for the user's profile picture |
+
+# Managing Databases
+
+# GVZ.setFlair
+Sets the flair used to make new spreadsheets and filter through existing ones.
+Flairs appear visually as `[YourFlair] DatabaseName` where the actual flair set is `YourFlair`.
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| string    | string  | No       | The flair to set |
+
+**Outputs:**
+Nothing
+
+# GVZ.getFlair
+Returns the current flair
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| string   | The current flair |
+
+# GVZ.clearFlair
+Resets the current flair
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+Nothing
+
+# GVZ.reloadDatabases
+Asynchronously reloads all the spreadsheets from the user's Google Drive that have the current flair
+
+**Inputs:**
+Nothing
+
+**Indirect Inputs:**
+| Parameter | Getter | Setter |
+| :-------- | :----- | :----- |
+| flair     | [GVZ.getFlair](#gvz-getflair) | [GVZ.setFlair](#gvz-setflair) |
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | The newly loaded databases | 
+| Rejected | Error message |
+
+# GVZ.reloadDatabase
+Asynchronously reloads a single spreadsheet from its spreadsheet ID regardless of flair
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| id        | string  | No       | The ID of the target spreadsheet |
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | The new [Database Reference Object](#database-reference)| 
+| Rejected | Error message |
+
+# GVZ.getDatabases
+Returns an array of all loaded [Database Reference Objects](#database-reference)
+
+**Inputs:**
+Nothing
+
+**Outputs:**
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| array    | All loaded [Database Reference Objects](#database-reference) |
+
+# GVZ.getDatabase
+Returns a single [Database Reference Object](#database-reference) that matches the given spreadsheet ID
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| id        | string  | No       | The ID of the target spreadsheet |
+
+**Outputs:**
+A [Database Reference Object](#database-reference)
+
+# GVZ.isDatabase
+Returns whether a given spreadsheet ID is in the loaded databases
+
+**Inputs:**
+| Parameter | Type    | Optional | Description |
+| :-------- | :------ | :------- | :---------- |
+| id        | string  | No       | The target spreadsheet ID |
+
+**Outputs:**
+A Value
+| Type     | Description |
+| :------- | :---------- |
+| boolean  | Whether the parameter is a loaded database |
+
+# GVZ.createDatabase
+Creates a spreadsheet with the current flair and loads it as a database given a [Database Template Object](#database-template)
+
+**Inputs:**
+| Parameter   | Type    | Optional | Description |
+| :---------- | :------ | :------- | :---------- |
+| database    | object  | No       | The structure of the database to create |
+
+**Indirect Inputs:**
+| Parameter | Getter | Setter |
+| :-------- | :----- | :----- |
+| flair     | [GVZ.getFlair](#gvz-getflair) | [GVZ.setFlair](#gvz-setflair) |
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | New [Database Reference Object](#database-reference) | 
+| Rejected | Error message |
+
+
+<!--
+# Examples
+
 ### Logging and Errors
 The library comes with its own logging features.
-It will throw errors and make debug statements (if enabled) for you, and can also be called manually.
+It will throw errors and make debug statements (if enabled) during async actions
 
 **Related Methods:**
 * [GVZ.log](#gvz-log)
@@ -208,3 +558,4 @@ GVZ.createDatabase(per3).then(function(newDatabase){
     });
 });
 ```
+-->

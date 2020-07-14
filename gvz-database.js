@@ -166,50 +166,24 @@ var GVZ = (function() {
 		return input;
 	}
 	
-	// Checks whether requirements for running a method are met
-	// Always requires gapi and GoogleAuth to be loaded
-	// requireAuth (optional) true requires user to be signed in with GoogleAuth
-	var checkReqs = function(requireAuth){
-		if (typeof(gapi) === undefined) { methods.err('gapi is undefined. Did the API load properly?'); }
-		if (typeof(GoogleAuth) === undefined) { methods.err('GoogleAuth is undefined. Try calling GVZ.initialize()'); }
-		if (requireAuth === true && GoogleAuth.isSignedIn.get() == false) { methods.err('Request failed. The user is not signed in.'); }
-	};
-	
 	/// ******************
 	/// * PUBLIC METHODS *
 	/// ******************
 	var methods = {};
 	
-	// All of library's log/debug statements
-	methods.log = function(string){
-		if (logging){ console.log(string); }
-	};
-	
-	// Control whether logging is on or off
-	methods.setLogging = function(bool){
-		logging = bool;
-	};
-	
-	// Toggle whether logging is on or off
-	methods.toggleLogging = function(bool){
-		logging = (!logging);
-	};
-	
-	// All of library's error messages, cannot be disabled
-	methods.err = function(string){
-		throw 'GVZ Error: '+string;
-	};
-
-	/// AUTH METHODS
-	
-	// ASYNC RETURN!
+    /// BASIC METHODS
+    
+    // ASYNC RETURN!
 	// Configures the GoogleAuth variable, creates a client for api requests
 	methods.initialize = function(apiKey,clientId,keepAuth){
-		checkReqs();
 		keepAuth = !(keepAuth === false); // validation, allows undefined value
+        methods.log('Initializing GVZ library... '+keepAuth ? '(will attempt auto auth)' : '(will not attempt auto auth)');
+        if (typeof(gapi) === undefined){ methods.err('Failed to initialize: the "gapi" variable is not set. Have you imported the Google JavaScript API?'); }
+        
 		return new Promise(function(resolve,reject){
 			// Call gapi load function
 			gapi.load('client:auth2', function(){
+                methods.log('Configured Google JavaScript API');
 				// Then initialize its client
 				gapi.client.init({ // Initialize a client with these properties
 					"apiKey":apiKey,
@@ -217,6 +191,7 @@ var GVZ = (function() {
 					"clientId":clientId,
 					"scope":"https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/spreadsheets"
 				}).then(function(){
+                    methods.log('Initialized authentication client');
 					// Then assign GoogleAuth and configure the listener callback pointer
 					GoogleAuth = gapi.auth2.getAuthInstance();
 					GoogleAuth.isSignedIn.listen(authStatusListener);
@@ -226,45 +201,39 @@ var GVZ = (function() {
 					resolve();
 				},
 				function(response){
-					reject(response.error);
+                    reject('Failed to initialize authentication client.\n Response: '+response.error);
 				});
 			});
 		});
 	};
-	
-	// ASYNC RETURN!
-	// Toggles auth status, triggering sign-in popup or signing out
-	methods.toggleAuth = function(){
-		checkReqs();
-		if (GoogleAuth.isSignedIn.get()) { return GoogleAuth.signOut(); }
-		else { return GoogleAuth.signIn(); }
+    
+	// All of library's log/debug statements
+	methods.log = function(string){
+		if (logging){ console.log(string); }
 	};
 	
-	// Returns current auth status
-	methods.isAuth = function(){
-		checkReqs();
-		return GoogleAuth.isSignedIn.get();
+	// Control whether logging is on or off
+	methods.setLogging = function(bool){
+		logging = (bool === true);
 	};
 	
-	// ASYNC RETURN!
-	// Signs in, triggering sign-in popup
-	methods.signIn = function(){
-		checkReqs();
-		return GoogleAuth.signIn();
+	// Toggle whether logging is on or off
+	methods.toggleLogging = function(){
+		logging = (!logging);
+        return logging;
 	};
 	
-	// ASYNC RETURN!
-	// Signs out
-	methods.signOut = function(){
-		checkReqs();
-		return GoogleAuth.signOut();
+	// All of library's error messages, cannot be disabled
+	methods.err = function(string){
+		throw 'GVZ Error: '+string;
 	};
-	
-	// Sets listener for change in auth status
+
+    /// AUTH METHODS
+    
+    // Sets listener for change in auth status
 	// Listener function is provided with new auth status
 	methods.setAuthListener = function(callback){
 		authStatusListener = function(){
-			checkReqs();
 			callback(GoogleAuth.isSignedIn.get());
 		};
 	};
@@ -273,38 +242,223 @@ var GVZ = (function() {
 	methods.clearAuthListener = function(){
 		authStatusListener = function(newStatus){};
 	};
-
+    	
+    // Returns current auth status
+	methods.isAuth = function(){
+		return GoogleAuth.isSignedIn.get();
+	};
+    
+	// ASYNC RETURN!
+    /// DOCS: write using https://developers.google.com/identity/sign-in/web/reference#googleauthsignin
+	// Signs in, triggering sign-in popup
+	methods.signIn = function(){
+		return GoogleAuth.signIn();
+	};
+	
+	// ASYNC RETURN!
+	// Signs out
+	methods.signOut = function(){
+		return GoogleAuth.signOut();
+	};
+    
+    // ASYNC RETURN!
+    /// DOCS: can have same error returns as GVZ.signIn()
+	// Toggles auth status, triggering sign-in popup or signing out
+	methods.toggleAuth = function(){
+		return GoogleAuth.isSignedIn.get() ? GoogleAuth.signOut() : GoogleAuth.signIn();
+	};
+	
 	// Returns info about the authenticated user, or undefined
 	methods.getUserInfo = function(){
-		checkReqs();
-		if (GoogleAuth.isSignedIn.get()){
-			let profile = GoogleAuth.currentUser.get().getBasicProfile();
-			return {
-				firstName: profile.getGivenName(),
-				lastName: profile.getFamilyName(),
-				email: profile.getEmail(),
-				picture: profile.getImageUrl()
-			};
-		}
-		else {
-			return undefined;
-		}
+		if (!methods.isAuth()) { methods.err('Failed to get user info: user is not signed in.'); }
+        let profile = GoogleAuth.currentUser.get().getBasicProfile();
+        return {
+            firstName: profile.getGivenName(),
+            lastName: profile.getFamilyName(),
+            email: profile.getEmail(),
+            picture: profile.getImageUrl()
+        };
 	};
 
 	/// DATABASE HANDLING METHODS
+    
+    // Sets database identifier flair
+	methods.setFlair = function(string){
+		flair = ""+string;
+	};
+	
+	// Gets database identifier flair
+	methods.getFlair = function(){
+		return flair;
+	};
+	
+	// Clears database identifier flair
+	methods.clearFlair = function(){
+		flair = "";
+	};
 	
 	// ASYNC RETURN!
+	// Loads all databses from user's Google Drive
+	methods.reloadDatabases = function(){
+		//methods.log('Reloading all databases...');
+		if (!methods.isAuth()) { methods.err('Failed to reload databases: user is not signed in.'); }
+		return new Promise(function(resolve,reject){
+			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
+			// get sheet listing
+			gapi.client.drive.files.list({
+				q: params,
+			}).then(function(response) {
+				if (response.status != 200){ reject(response); }
+				
+				let newDatabases = response.result.files;
+				
+				// filter recieved databases if necessary
+				if (flair != ""){
+					//methods.log('Filtering by flair "['+flair+']"');
+					for (let i = 0; i < newDatabases.length; i++){
+						if (newDatabases[i].name.substring(0, ('['+flair+']').length) != '['+flair+']'){
+							//methods.log('Filtered out database "'+newDatabases[i].name+'"');
+							newDatabases.splice(i,1);
+							i--;
+						}
+					}
+				}
+				
+				if (newDatabases.length < 1){
+					resolve(databases); // no databases, oh well
+				}
+				
+				// clear databases array and reload each new one
+				// gross because async
+				databases = [];
+				let requiredSuccesses = newDatabases.length;
+				for (let i = 0; i < newDatabases.length; i++){
+					methods.reloadDatabase(newDatabases[i].id).then(function(response){
+						// after every reload check to see if we did them all
+						if (databases.length >= requiredSuccesses){ 
+							//methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							resolve(databases);
+						}
+					}).catch(function(){ // if any reject then ignore them
+						requiredSuccesses--;
+						if (databases.length >= requiredSuccesses){ 
+							//methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							resolve(databases);
+						}
+					});
+				}
+				
+			});
+		});
+	};
+	
+	// ASYNC RETURN!
+	// Reloads all info on single database from user's Google Drive
+	// Resolves with new database object
+	methods.reloadDatabase = function(id){
+		//methods.log('Reloading database "'+id+'"...');
+		if (!methods.isAuth()) { methods.err('Failed to reload database "'+id+'": user is not signed in.'); }
+		return new Promise(function(resolve,reject){
+			// get spreadsheet name, id, and pages
+			gapi.client.sheets.spreadsheets.get({
+				spreadsheetId: id
+			}).then(function(response){
+				if (response.status != 200){ reject(response); }				
+				
+				// create new database object from base methods
+				var database = new Database(response.result.properties.title, id, []);
+				//methods.log(database.id+': '+database.name);
+				
+				// start building the pages
+				let sheets = response.result.sheets; // response's pages
+				let ranges = []; // header and datatype rows to check
+				
+				for (let i = 0; i < sheets.length; i++){
+					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId);
+					database.pushTable(table);
+					ranges.push(sheets[i].properties.title+'!1:2');
+				}
+				
+				// get extra page data
+				gapi.client.sheets.spreadsheets.get({
+					spreadsheetId: id,
+					ranges: ranges,
+					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
+				}).then(function(response){
+					if (response.status != 200){ reject(response); }
+					try { // potential parsing errors, reject if any happen
+						// finish building the pages
+						for (let i = 0; i < response.result.sheets.length; i++){
+							let hrow = response.result.sheets[i].data[0].rowData[0].values;
+							let drow = response.result.sheets[i].data[0].rowData[1].values;
+						
+							for (let c = 0; c < hrow.length; c++){
+								let col = new Column();
+								try { col.header = hrow[c].formattedValue; }
+								catch (e) { col.header = ""; }
+								col.datatype = JSONtoDatatype(drow[c]);
+								if (col.datatype === undefined){
+									methods.err('Could not determine datatype for column '+c+' ('+col.header+')');
+								}
+								database.tables[i].columns.push(col);
+							}
+						}
+						
+						// remove any old instances of the database id
+						for (let i = 0; i < databases.length; i++){
+							if (databases[i].id == id){
+								databases.splice(i,1);
+								i--;
+							}
+						}
+						// add the new database version
+						databases.push(database);
+						//methods.log('Successfully reloaded database "'+id+'"');
+						resolve(database);
+					}
+					catch (e) {
+						//methods.log('Failed to reload database "'+id+'"');
+						reject();
+					}
+				});
+			});
+		});
+	};
+	
+	// Returns databases variable 
+	methods.getDatabases = function(){
+		return databases;
+	};
+	
+	// Returns info on single database given id
+	methods.getDatabase = function(id){
+        for (let i = 0; i < databases.length; i++){
+            if (databases[i].id == id) { return databases[i]; }
+        }
+		methods.err('Unknown Database ID "'+database+'"');
+	};
+	
+	// Returns whether a database exists give its id
+	methods.isDatabase = function(id){
+		for (let i = 0; i < databases.length; i++){
+			if (id == databases[i].id) { return true; }
+		}
+		return false;
+	};
+	
+    // ASYNC RETURN!
 	// Creates online database from database template object
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
-		methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
+		//methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
 		if (!database.isValid()){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
+        if (!methods.isAuth()) { methods.err('Failed to create new database: user is not signed in.'); }
 		
 		// Clone database template object so we can modify it
 		database = JSON.parse(JSON.stringify(database));
 		database.name = getFlairString()+database.name;
 		
-		checkReqs(true);
+		
 		return new Promise(function(resolve,reject){
 			gapi.client.sheets.spreadsheets.create({
 				'properties': { 
@@ -405,7 +559,7 @@ var GVZ = (function() {
 						}).then(function(response){
 							if (response.status != 200){ reject(response); }
 							methods.reloadDatabase(database.id).then(function(newDatabase){
-								methods.log('Created new database "'+newDatabase.name+'"');
+								//methods.log('Created new database "'+newDatabase.name+'"');
 								resolve(newDatabase);
 							});
 						});
@@ -415,172 +569,6 @@ var GVZ = (function() {
 			});
 		});
 	}
-	
-	// ASYNC RETURN!
-	//Loads all databses from user's Google Drive
-	methods.reloadDatabases = function(){
-		methods.log('Reloading all databases...');
-		checkReqs(true);
-		return new Promise(function(resolve,reject){
-			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
-			// get sheet listing
-			gapi.client.drive.files.list({
-				q: params,
-			}).then(function(response) {
-				if (response.status != 200){ reject(response); }
-				
-				let newDatabases = response.result.files;
-				
-				// filter recieved databases if necessary
-				if (flair != ""){
-					methods.log('Filtering by flair "['+flair+']"');
-					for (let i = 0; i < newDatabases.length; i++){
-						if (newDatabases[i].name.substring(0, ('['+flair+']').length) != '['+flair+']'){
-							methods.log('Filtered out database "'+newDatabases[i].name+'"');
-							newDatabases.splice(i,1);
-							i--;
-						}
-					}
-				}
-				
-				if (newDatabases.length < 1){
-					resolve(databases); // no databases, oh well
-				}
-				
-				// clear databases array and reload each new one
-				// gross because async
-				databases = [];
-				let requiredSuccesses = newDatabases.length;
-				for (let i = 0; i < newDatabases.length; i++){
-					methods.reloadDatabase(newDatabases[i].id).then(function(response){
-						// after every reload check to see if we did them all
-						if (databases.length >= requiredSuccesses){ 
-							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
-							resolve(databases);
-						}
-					}).catch(function(){ // if any reject then ignore them
-						requiredSuccesses--;
-						if (databases.length >= requiredSuccesses){ 
-							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
-							resolve(databases);
-						}
-					});
-				}
-				
-			});
-		});
-	};
-	
-	// ASYNC RETURN!
-	// Reloads all info on single database from user's Google Drive
-	// Resolves with new database object
-	methods.reloadDatabase = function(id){
-		methods.log('Reloading database "'+id+'"...');
-		checkReqs(true);
-		return new Promise(function(resolve,reject){
-			// get spreadsheet name, id, and pages
-			gapi.client.sheets.spreadsheets.get({
-				spreadsheetId: id
-			}).then(function(response){
-				if (response.status != 200){ reject(response); }				
-				
-				// create new database object from base methods
-				var database = new Database(response.result.properties.title, id, []);
-				methods.log(database.id+': '+database.name);
-				
-				// start building the pages
-				let sheets = response.result.sheets; // response's pages
-				let ranges = []; // header and datatype rows to check
-				
-				for (let i = 0; i < sheets.length; i++){
-					let table = new Table(sheets[i].properties.title, sheets[i].properties.sheetId);
-					database.pushTable(table);
-					ranges.push(sheets[i].properties.title+'!1:2');
-				}
-				
-				// get extra page data
-				gapi.client.sheets.spreadsheets.get({
-					spreadsheetId: id,
-					ranges: ranges,
-					fields: 'sheets/data/rowData/values/userEnteredFormat/numberFormat,sheets/data/rowData/values/dataValidation,sheets/data/rowData/values/formattedValue'
-				}).then(function(response){
-					if (response.status != 200){ reject(response); }
-					try { // potential parsing errors, reject if any happen
-						// finish building the pages
-						for (let i = 0; i < response.result.sheets.length; i++){
-							let hrow = response.result.sheets[i].data[0].rowData[0].values;
-							let drow = response.result.sheets[i].data[0].rowData[1].values;
-						
-							for (let c = 0; c < hrow.length; c++){
-								let col = new Column();
-								try { col.header = hrow[c].formattedValue; }
-								catch (e) { col.header = ""; }
-								col.datatype = JSONtoDatatype(drow[c]);
-								if (col.datatype === undefined){
-									methods.err('Could not determine datatype for column '+c+' ('+col.header+')');
-								}
-								database.tables[i].columns.push(col);
-							}
-						}
-						
-						// remove any old instances of the database id
-						for (let i = 0; i < databases.length; i++){
-							if (databases[i].id == id){
-								databases.splice(i,1);
-								i--;
-							}
-						}
-						// add the new database version
-						databases.push(database);
-						methods.log('Successfully reloaded database "'+id+'"');
-						resolve(database);
-					}
-					catch (e) {
-						methods.log('Failed to reload database "'+id+'"');
-						reject();
-					}
-				});
-			});
-		});
-	};
-	
-	// Returns databases variable 
-	methods.getDatabases = function(){
-		return databases;
-	};
-	
-	// Returns info on single database given id
-	methods.getDatabase = function(id){
-		if (methods.isDatabase(id)){
-			for (let i = 0; i < databases.length; i++){
-				if (databases[i].id == id) { return databases[i]; }
-			}
-		}
-		else { methods.err('Unknown Database ID "'+database+'"'); }
-	};
-	
-	// Returns whether a database exists give its id
-	methods.isDatabase = function(id){
-		for (let i = 0; i < databases.length; i++){
-			if (id == databases[i].id) { return true; }
-		}
-		return false;
-	};
-	
-	// Sets database identifier flair
-	methods.setFlair = function(string){
-		flair = ""+string;
-	};
-	
-	// Gets database identifier flair
-	methods.getFlair = function(){
-		return flair;
-	};
-	
-	// Clears database identifier flair
-	methods.clearFlair = function(){
-		flair = "";
-	};
 
 	/// ***********
 	/// * CLASSES *
@@ -699,7 +687,7 @@ var GVZ = (function() {
 		// ASYNC RETURN!
 		// Pushes rowdata in array to end of table
         push(arr){
-			checkReqs(true);
+			if (!methods.isAuth()) { methods.err('Failed to push row: user is not signed in.'); }
             let rowdata = this.parseRowdata(arr);
             
             // Prepare any properties since this object becomes unaccessable in the promise
@@ -727,7 +715,7 @@ var GVZ = (function() {
         // ASYNC RETURN!
 		// Pushes rowdata in array to end of table
         pushMany(nestedArr){
-            checkReqs(true);
+            if (!methods.isAuth()) { methods.err('Failed to push rows: user is not signed in.'); }
             let rowdata = [];
             for (let i = 0; i < nestedArr.length; i++){
                 rowdata.push(this.parseRowdata(nestedArr[i]));
@@ -794,12 +782,33 @@ var GVZ = (function() {
 		}
 	}
 
+    /// EXPOSING PROPERTIES AND METHODS
+    
 	// Include template versions in public stuff
 	methods.Database = DatabaseTemplate;
 	methods.Table = TableTemplate;
 	methods.Column = ColumnTemplate;
-	
-	/// EXPOSE PUBLIC METHODS TO USER
+    
+    // If things haven't been initialized, only show these
+    if (typeof(gapi) === undefined || typeof(GoogleAuth) === undefined){
+        methods.log('The exposed functions have been limited. Make sure you import the requirements and initialize the library.');
+        return {
+            initialize: methods.initialize,
+            log: methods.log,
+            setLogging: methods.setLogging,
+            toggleLogging: methods.toggleLogging,
+            err: methods.err,
+            setFlair: methods.setFlair,
+            getFlair: methods.getFlair,
+            clearFlair: methods.clearFlair,
+            setAuthListener: methods.setAuthListener,
+            clearAuthListener: methods.clearAuthListener,
+            Database: methods.Database,
+            Table: methods.Table,
+            Column: methods.Column
+        };
+    }   
+    
 	return methods;
 	
 })();
