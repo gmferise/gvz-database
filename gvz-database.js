@@ -245,31 +245,34 @@ var GVZ = (function() {
     	
     // Returns current auth status
 	methods.isAuth = function(){
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.isAuth()'); }
 		return GoogleAuth.isSignedIn.get();
 	};
     
 	// ASYNC RETURN!
-    /// DOCS: write using https://developers.google.com/identity/sign-in/web/reference#googleauthsignin
 	// Signs in, triggering sign-in popup
 	methods.signIn = function(){
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.signIn()'); }
 		return GoogleAuth.signIn();
 	};
 	
 	// ASYNC RETURN!
 	// Signs out
 	methods.signOut = function(){
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.signOut()'); }
 		return GoogleAuth.signOut();
 	};
     
     // ASYNC RETURN!
-    /// DOCS: can have same error returns as GVZ.signIn()
 	// Toggles auth status, triggering sign-in popup or signing out
 	methods.toggleAuth = function(){
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.toggleAuth()'); }
 		return GoogleAuth.isSignedIn.get() ? GoogleAuth.signOut() : GoogleAuth.signIn();
 	};
 	
 	// Returns info about the authenticated user, or undefined
 	methods.getUserInfo = function(){
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.getUserInfo()'); }
 		if (!methods.isAuth()) { methods.err('Failed to get user info: user is not signed in.'); }
         let profile = GoogleAuth.currentUser.get().getBasicProfile();
         return {
@@ -301,6 +304,8 @@ var GVZ = (function() {
 	// Loads all databses from user's Google Drive
 	methods.reloadDatabases = function(){
 		//methods.log('Reloading all databases...');
+        if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.reloadDatabases()'); }
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.reloadDatabases()'); }
 		if (!methods.isAuth()) { methods.err('Failed to reload databases: user is not signed in.'); }
 		return new Promise(function(resolve,reject){
 			let params = "mimeType='application/vnd.google-apps.spreadsheet' and '"+GoogleAuth.currentUser.get().getBasicProfile().getEmail()+"' in writers and trashed = false";
@@ -357,6 +362,8 @@ var GVZ = (function() {
 	// Resolves with new database object
 	methods.reloadDatabase = function(id){
 		//methods.log('Reloading database "'+id+'"...');
+        if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.reloadDatabase()'); }
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.reloadDatabase()'); }
 		if (!methods.isAuth()) { methods.err('Failed to reload database "'+id+'": user is not signed in.'); }
 		return new Promise(function(resolve,reject){
 			// get spreadsheet name, id, and pages
@@ -451,6 +458,8 @@ var GVZ = (function() {
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
 		//methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
+        if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.createDatabase()'); }
+        if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.createDatabase()'); }
 		if (!database.isValid()){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
         if (!methods.isAuth()) { methods.err('Failed to create new database: user is not signed in.'); }
 		
@@ -687,7 +696,8 @@ var GVZ = (function() {
 		// ASYNC RETURN!
 		// Pushes rowdata in array to end of table
         push(arr){
-			if (!methods.isAuth()) { methods.err('Failed to push row: user is not signed in.'); }
+			if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling Table.push()'); }
+            if (!methods.isAuth()) { methods.err('Failed to push row: user is not signed in.'); }
             let rowdata = this.parseRowdata(arr);
             
             // Prepare any properties since this object becomes unaccessable in the promise
@@ -715,6 +725,7 @@ var GVZ = (function() {
         // ASYNC RETURN!
 		// Pushes rowdata in array to end of table
         pushMany(nestedArr){
+            if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling Table.pushMany()'); }
             if (!methods.isAuth()) { methods.err('Failed to push rows: user is not signed in.'); }
             let rowdata = [];
             for (let i = 0; i < nestedArr.length; i++){
@@ -788,26 +799,6 @@ var GVZ = (function() {
 	methods.Database = DatabaseTemplate;
 	methods.Table = TableTemplate;
 	methods.Column = ColumnTemplate;
-    
-    // If things haven't been initialized, only show these
-    if (typeof(gapi) === undefined || typeof(GoogleAuth) === undefined){
-        methods.log('The exposed functions have been limited. Make sure you import the requirements and initialize the library.');
-        return {
-            initialize: methods.initialize,
-            log: methods.log,
-            setLogging: methods.setLogging,
-            toggleLogging: methods.toggleLogging,
-            err: methods.err,
-            setFlair: methods.setFlair,
-            getFlair: methods.getFlair,
-            clearFlair: methods.clearFlair,
-            setAuthListener: methods.setAuthListener,
-            clearAuthListener: methods.clearAuthListener,
-            Database: methods.Database,
-            Table: methods.Table,
-            Column: methods.Column
-        };
-    }   
     
 	return methods;
 	
