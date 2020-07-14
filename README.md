@@ -13,36 +13,36 @@ features of the API allowing a cleaner application to be built using them.
     * [Promises](#promises)
 
 * [Basic Methods](#basic-methods)
-    * [GVZ.log](#gvz-log)
-    * [GVZ.setLogging](#gvz-setlogging)
-    * [GVZ.toggleLogging](#gvz-togglelogging)
-    * [GVZ.err](#gvz-err)
-    * [GVZ.initialize](#gvz-initialize)
+    * [GVZ.log](#gvzlog)
+    * [GVZ.setLogging](#gvzsetlogging)
+    * [GVZ.toggleLogging](#gvztogglelogging)
+    * [GVZ.err](#gvzerr)
+    * [GVZ.initialize](#gvzinitialize)
     
 * [Handling Authentication](#handling-authentication)
-    * [GVZ.setAuthListener](#gvz-setauthlistener)
-    * [GVZ.clearAuthListener](#gvz-clearauthlistener)
-    * [GVZ.isAuth](#gvz-isauth)
-    * [GVZ.signIn](#gvz-signin)
-    * [GVZ.signOut](#gvz-signout)
-    * [GVZ.toggleAuth](#gvz-toggleauth)
-    * [GVZ.getUserInfo](#gvz-getuserinfo)
+    * [GVZ.setAuthListener](#gvzsetauthlistener)
+    * [GVZ.clearAuthListener](#gvzclearauthlistener)
+    * [GVZ.isAuth](#gvzisauth)
+    * [GVZ.signIn](#gvzsignin)
+    * [GVZ.signOut](#gvzsignout)
+    * [GVZ.toggleAuth](#gvztoggleauth)
+    * [GVZ.getUserInfo](#gvzgetuserinfo)
     
 * [Managing Databases](#managing-databases)
-    * [GVZ.setFlair](#gvz-setflair)
-    * [GVZ.getFlair](#gvz-getflair)
-    * [GVZ.clearFlar](#gvz-clearflair)
-    * [GVZ.reloadDatabases](#gvz-reloaddatabases)
-    * [GVZ.reloadDatabase](#gvz-reloaddatabase)
-    * [GVZ.getDatabases](#gvz-getdatabases)
-    * [GVZ.getDatabase](#gvz-getdatabase)
-    * [GVZ.isDatabase](#gvz-isdatabase)
-    * [GVZ.createDatabase](#gvz-createdatabase)
+    * [GVZ.setFlair](#gvzsetflair)
+    * [GVZ.getFlair](#gvzgetflair)
+    * [GVZ.clearFlar](#gvzclearflair)
+    * [GVZ.reloadDatabases](#gvzreloaddatabases)
+    * [GVZ.reloadDatabase](#gvzreloaddatabase)
+    * [GVZ.getDatabases](#gvzgetdatabases)
+    * [GVZ.getDatabase](#gvzgetdatabase)
+    * [GVZ.isDatabase](#gvzisdatabase)
+    * [GVZ.createDatabase](#gvzcreatedatabase)
 	
 * [Constructable Objects](#constructable-objects)
-    * [GVZ.Database](#gvz-database)
-    * [GVZ.Table](#gvz-table)
-    * [GVZ.Column](#gvz-column)
+    * [GVZ.Database](#gvzdatabase)
+    * [GVZ.Table](#gvztable)
+    * [GVZ.Column](#gvzcolumn)
 
 * [Reference Objects](#reference-objects)
     * [Database](#database-reference)
@@ -68,7 +68,7 @@ You will also need to:
 The following is the most basic way to initialize the library, although other configurations may also work.
 
 **Related Methods:**
-* [GVZ.initialize](#gvz-initialize)
+* [GVZ.initialize](#gvzinitialize)
 
 **Example:**
 ```html
@@ -431,10 +431,10 @@ The library comes with its own logging features.
 It will throw errors and make debug statements (if enabled) during async actions
 
 **Related Methods:**
-* [GVZ.log](#gvz-log)
-* [GVZ.setLogging](#gvz-setlogging)
-* [GVZ.toggleLogging](#gvz-togglelogging)
-* [GVZ.err](#gvz-err)
+* [GVZ.log](#gvzlog)
+* [GVZ.setLogging](#gvzsetlogging)
+* [GVZ.toggleLogging](#gvztogglelogging)
+* [GVZ.err](#gvzerr)
 
 **Example:**
 ```javascript
@@ -458,10 +458,10 @@ GVZ.log("This will not print, the program halts first.");
 The library requires very little of you to allow the user to authenticate with their Google account.
 
 **Related Methods:**
-* [GVZ.signIn](#gvz-signin)
-* [GVZ.signOut](#gvz-signout)
-* [GVZ.toggleAuth](#gvz-toggleauth)
-* [GVZ.isAuth](#gvz-isauth)
+* [GVZ.signIn](#gvzsignin)
+* [GVZ.signOut](#gvzsignout)
+* [GVZ.toggleAuth](#gvztoggleauth)
+* [GVZ.isAuth](#gvzisauth)
 
 `GVZ.toggleAuth()` is most useful as a button function and will sign in or sign out the user appropriately.
 
