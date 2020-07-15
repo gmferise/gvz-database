@@ -176,9 +176,9 @@ var GVZ = (function() {
     // ASYNC RETURN!
 	// Configures the GoogleAuth variable, creates a client for api requests
 	methods.initialize = function(apiKey,clientId,keepAuth){
+        if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.initialize()'); }
 		keepAuth = !(keepAuth === false); // validation, allows undefined value
         methods.log('Initializing GVZ library... '+keepAuth ? '(will attempt auto auth)' : '(will not attempt auto auth)');
-        if (typeof(gapi) === undefined){ methods.err('Failed to initialize: the "gapi" variable is not set. Have you imported the Google JavaScript API?'); }
         
 		return new Promise(function(resolve,reject){
 			// Call gapi load function
