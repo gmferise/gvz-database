@@ -253,6 +253,7 @@ var GVZ = (function() {
 	// Signs in, triggering sign-in popup
 	methods.signIn = function(){
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.signIn()'); }
+        methods.log('Asking user to authenticate...');
 		return GoogleAuth.signIn();
 	};
 	
@@ -260,6 +261,7 @@ var GVZ = (function() {
 	// Signs out
 	methods.signOut = function(){
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.signOut()'); }
+        methods.log('Deauthenticating...');
 		return GoogleAuth.signOut();
 	};
     
@@ -267,7 +269,14 @@ var GVZ = (function() {
 	// Toggles auth status, triggering sign-in popup or signing out
 	methods.toggleAuth = function(){
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.toggleAuth()'); }
-		return GoogleAuth.isSignedIn.get() ? GoogleAuth.signOut() : GoogleAuth.signIn();
+        if (GoogleAuth.isSignedIn.get()){
+            methods.log('Deauthenticating...');
+            return GoogleAuth.signOut();
+        }
+        else {
+            methods.log('Asking user to authenticate...');
+            return GoogleAuth.signIn();
+        }
 	};
 	
 	// Returns info about the authenticated user, or undefined
@@ -303,7 +312,7 @@ var GVZ = (function() {
 	// ASYNC RETURN!
 	// Loads all databses from user's Google Drive
 	methods.reloadDatabases = function(){
-		//methods.log('Reloading all databases...');
+		methods.log('Reloading all databases...');
         if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.reloadDatabases()'); }
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.reloadDatabases()'); }
 		if (!methods.isAuth()) { methods.err('Failed to reload databases: user is not signed in.'); }
@@ -319,10 +328,10 @@ var GVZ = (function() {
 				
 				// filter recieved databases if necessary
 				if (flair != ""){
-					//methods.log('Filtering by flair "['+flair+']"');
+					methods.log('Filtering by flair "['+flair+']"');
 					for (let i = 0; i < newDatabases.length; i++){
 						if (newDatabases[i].name.substring(0, ('['+flair+']').length) != '['+flair+']'){
-							//methods.log('Filtered out database "'+newDatabases[i].name+'"');
+							methods.log('Filtered out database "'+newDatabases[i].name+'"');
 							newDatabases.splice(i,1);
 							i--;
 						}
@@ -341,13 +350,13 @@ var GVZ = (function() {
 					methods.reloadDatabase(newDatabases[i].id).then(function(response){
 						// after every reload check to see if we did them all
 						if (databases.length >= requiredSuccesses){ 
-							//methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
 							resolve(databases);
 						}
 					}).catch(function(){ // if any reject then ignore them
 						requiredSuccesses--;
 						if (databases.length >= requiredSuccesses){ 
-							//methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
+							methods.log('Finished reloading all databases. Skipped '+(newDatabases.length-requiredSuccesses)+'/'+newDatabases.length);
 							resolve(databases);
 						}
 					});
@@ -361,7 +370,7 @@ var GVZ = (function() {
 	// Reloads all info on single database from user's Google Drive
 	// Resolves with new database object
 	methods.reloadDatabase = function(id){
-		//methods.log('Reloading database "'+id+'"...');
+		methods.log('Reloading database "'+id+'"...');
         if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.reloadDatabase()'); }
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.reloadDatabase()'); }
 		if (!methods.isAuth()) { methods.err('Failed to reload database "'+id+'": user is not signed in.'); }
@@ -374,7 +383,7 @@ var GVZ = (function() {
 				
 				// create new database object from base methods
 				var database = new Database(response.result.properties.title, id, []);
-				//methods.log(database.id+': '+database.name);
+				methods.log(database.id+': '+database.name);
 				
 				// start building the pages
 				let sheets = response.result.sheets; // response's pages
@@ -420,11 +429,11 @@ var GVZ = (function() {
 						}
 						// add the new database version
 						databases.push(database);
-						//methods.log('Successfully reloaded database "'+id+'"');
+						methods.log('Successfully reloaded database "'+id+'"');
 						resolve(database);
 					}
 					catch (e) {
-						//methods.log('Failed to reload database "'+id+'"');
+						methods.log('Failed to reload database "'+id+'"');
 						reject();
 					}
 				});
@@ -457,7 +466,7 @@ var GVZ = (function() {
 	// Creates online database from database template object
 	// Also causes a database reload at the end
 	methods.createDatabase = function(database){
-		//methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
+		methods.log('Creating new database "'+getFlairString()+database.name+'"...	');
         if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling GVZ.createDatabase()'); }
         if (typeof(GoogleAuth) === 'undefined'){ methods.err('You must call GVZ.initialize() before using GVZ.createDatabase()'); }
 		if (!database.isValid()){ methods.err('Failed to create new database "'+getFlairString()+database.name+'" malformed template'); }
@@ -568,7 +577,7 @@ var GVZ = (function() {
 						}).then(function(response){
 							if (response.status != 200){ reject(response); }
 							methods.reloadDatabase(database.id).then(function(newDatabase){
-								//methods.log('Created new database "'+newDatabase.name+'"');
+								methods.log('Created new database "'+newDatabase.name+'"');
 								resolve(newDatabase);
 							});
 						});
@@ -699,6 +708,7 @@ var GVZ = (function() {
 			if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling Table.push()'); }
             if (!methods.isAuth()) { methods.err('Failed to push row: user is not signed in.'); }
             let rowdata = this.parseRowdata(arr);
+            methods.log('Pushing row '+rowdata);
             
             // Prepare any properties since this object becomes unaccessable in the promise
             let parentId = this.parentId;
@@ -717,6 +727,7 @@ var GVZ = (function() {
                     }
                 }).then(function(response){
                     if (response.status != 200){ reject(response); }
+                    methods.log('Pushed row '+rowdata);
                     resolve();
                 });
             });
@@ -727,10 +738,12 @@ var GVZ = (function() {
         pushMany(nestedArr){
             if (typeof(gapi) === 'undefined'){ methods.err('You must import https://apis.google.com/js/api.js before calling Table.pushMany()'); }
             if (!methods.isAuth()) { methods.err('Failed to push rows: user is not signed in.'); }
+            
             let rowdata = [];
             for (let i = 0; i < nestedArr.length; i++){
                 rowdata.push(this.parseRowdata(nestedArr[i]));
             }
+            methods.log('Pushing rows '+rowdata);
             
             // Prepare any properties since this object becomes unaccessable in the promise
             let parentId = this.parentId;
@@ -747,6 +760,7 @@ var GVZ = (function() {
                     }
                 }).then(function(response){
                     if (response.status != 200){ reject(response); }
+                    methods.log('Pushed rows '+rowdata);
                     resolve();
                 });
             });
@@ -827,7 +841,7 @@ function isoDuration(dateObj){
 // Index to letter
 function indexToLetter(num){
     /*
-   Counts basically like this but with 26 chars:
+   Counts basically like this but with the 26 letters:
     0  1  2  3  4  5  6  7  8  9
    00 01 02 03 04 05 06 07 08 09
    10 11 12 13 14 15 16 17 18 19
