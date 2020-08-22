@@ -476,6 +476,19 @@ A Promise
 | Rejected | Error message |
 
 ## Table.select
+Selects rows of data based on the string query
+
+**Inputs:**
+| Parameter | Type   | Optional | Description |
+| :-------- | :----- | :------- | :---------- |
+| query     | string | Yes      | A query that describes what data to select |
+
+**Outputs:**
+A Promise
+| Result   | Returns |
+| :------- | :------ |
+| Resolved | A [Selection Object](#selection-reference) |
+| Rejected | Error message |
 
 ## Table.update
 <!--

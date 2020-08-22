@@ -175,7 +175,7 @@ var GVZ = (function() {
         return GoogleAuth;
     };
     
-    methods.DEBUG_gvzQuery(query){
+    methods.DEBUG_gvzQuery = function(query){
         let request = new google.visualization.Query('https://docs.google.com/spreadsheets/d/'+GVZ.getDatabases()[0].id+'/gviz/tq?headers=1&gid=0&access_token='+encodeURIComponent(GoogleAuth.currentUser.get().getAuthResponse().access_token));
         request.setQuery(query);
         return new Promise(function(resolve,reject){
