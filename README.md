@@ -483,11 +483,17 @@ Selects rows of data based on the string query
 | :-------- | :----- | :------- | :---------- |
 | query     | string | Yes      | A query that describes what data to select |
 
+If the paremeter is left blank, it will be treated as the same as a `SELECT *` query.
+
+See the [Google Documentation] for using the query language.
+You do not have to type `SELECT ` before your query as it's added for you.
+The option `no_format` is also applied to the query.
+
 **Outputs:**
 A Promise
 | Result   | Returns |
 | :------- | :------ |
-| Resolved | A [Selection Object](#selection-reference) |
+| Resolved | A [Google DataTable Object](https://developers.google.com/chart/interactive/docs/reference#DataTable) |
 | Rejected | Error message |
 
 ## Table.update

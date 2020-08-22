@@ -171,20 +171,6 @@ var GVZ = (function() {
     /// ******************
     var methods = {};
     
-    methods.DEBUG_GoogleAuth = function(){
-        return GoogleAuth;
-    };
-    
-    methods.DEBUG_gvzQuery = function(query){
-        let request = new google.visualization.Query('https://docs.google.com/spreadsheets/d/'+GVZ.getDatabases()[0].id+'/gviz/tq?headers=1&gid=0&access_token='+encodeURIComponent(GoogleAuth.currentUser.get().getAuthResponse().access_token));
-        request.setQuery(query);
-        return new Promise(function(resolve,reject){
-            request.send(function(response){
-                resolve(response);
-            });
-        });
-    };
-    
     /// BASIC METHODS
     
     // ASYNC RETURN!
@@ -788,21 +774,15 @@ var GVZ = (function() {
         // ASYNC RETURN!
         // Selects data
         select(query){
-            // Collect possible column tokens
-            let tokens = {};
-            for (let i = 0; i < this.columns.length; i++){
-                tokens[columns[i].header] = indexToLetter(i);
-            }
-            // Replace headers with their tokens
-            query = query.split(' ');
-            for (let i = 0; i < query.length; i++){
-                let newValue = tokens[query[i]];
-                if (newValue == undefined){ newValue = tokens[query[i].replace(',','')]+','; }
-                if (newValue != undefined){
-                    query[i] = newValue;
-                }
-            }
-            // 
+            if (query === undefined || query === ''){ query = '*'; }
+            let request = new google.visualization.Query('https://docs.google.com/spreadsheets/d/'+this.parentId+'/gviz/tq?headers=1&gid='+this.id+'&access_token='+encodeURIComponent(GoogleAuth.currentUser.get().getAuthResponse().access_token));
+            request.setQuery('SELECT '+query+' OPTIONS no_format');
+            return new Promise(function(resolve,reject){
+                request.send(function(response){
+                    // Process the response?
+                    resolve(response.getDataTable());
+                });
+            });
         }
         
     }
@@ -835,12 +815,6 @@ var GVZ = (function() {
             if (decimals !== undefined){
                 this.decimals = decimals;
             }
-        }
-    }
-
-    class Selection {
-        constructor(){
-            this.data = [];
         }
     }
     
