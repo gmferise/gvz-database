@@ -56,14 +56,14 @@ features of the API allowing a cleaner application to be built using them.
     * [Datatype](#datatype-reference)
     * [Selection](#selection-reference)
     
-* [Utility Functions)(#utility-functions)
-    * isoDateTime(#isodatetime)
-    * isoDate(#isodate)
-    * isoTime(#isotime)
-    * isoDuration(#isoduration)
-    * indexToLetter(#indextoletter)
-    * padZeroes(#padzeroes)
-    * findDuplicates(#findduplicates)
+* [Utility Functions](#utility-functions)
+    * [isoDateTime](#isodatetime)
+    * [isoDate](#isodate)
+    * [isoTime](#isotime)
+    * [isoDuration](#isoduration)
+    * [indexToLetter](#indextoletter)
+    * [padZeroes](#padzeroes)
+    * [findDuplicates](#findduplicates)
 
 # Getting Started
 
