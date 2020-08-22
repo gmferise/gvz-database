@@ -268,7 +268,7 @@ See the [Google Documentation](https://developers.google.com/identity/sign-in/we
 for more detail.
 
 ## GVZ.signOut
-Returns a Promise that is fulfilled when the user is signed out
+Signs the user out
 
 **Inputs:**
 Nothing
@@ -284,7 +284,7 @@ See the [Google Documentation](https://developers.google.com/identity/sign-in/we
 for more detail.
 
 ## GVZ.toggleAuth
-Changes the authentication status by calling either[GVZ.signOut](#gvzsignout) or [GVZ.signIn](#gvzsignin) accordingly
+Changes the authentication status by calling either [GVZ.signOut](#gvzsignout) or [GVZ.signIn](#gvzsignin) accordingly
 
 **Inputs:**
 Nothing

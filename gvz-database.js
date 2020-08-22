@@ -171,6 +171,20 @@ var GVZ = (function() {
     /// ******************
     var methods = {};
     
+    methods.DEBUG_GoogleAuth = function(){
+        return GoogleAuth;
+    };
+    
+    methods.DEBUG_gvzQuery(query){
+        let request = new google.visualization.Query('https://docs.google.com/spreadsheets/d/'+GVZ.getDatabases()[0].id+'/gviz/tq?headers=1&gid=0&access_token='+encodeURIComponent(GoogleAuth.currentUser.get().getAuthResponse().access_token));
+        request.setQuery(query);
+        return new Promise(function(resolve,reject){
+            request.send(function(response){
+                resolve(response);
+            });
+        });
+    };
+    
     /// BASIC METHODS
     
     // ASYNC RETURN!
@@ -592,6 +606,8 @@ var GVZ = (function() {
     /// * CLASSES *
     /// ***********
     
+    /// CONSTRUCTABLE OBJECTS
+    
     class DatabaseTemplate {
         constructor(name, tables){
             this.name = name;
@@ -654,6 +670,8 @@ var GVZ = (function() {
             }
         }
     }
+    
+    /// REFERENCE OBJECTS
     
     class Database {
         constructor(name, id){
@@ -784,7 +802,7 @@ var GVZ = (function() {
                     query[i] = newValue;
                 }
             }
-            
+            // 
         }
         
     }
@@ -820,9 +838,15 @@ var GVZ = (function() {
         }
     }
 
+    class Selection {
+        constructor(){
+            this.data = [];
+        }
+    }
+    
     /// EXPOSING PROPERTIES AND METHODS
     
-    // Include template versions in public stuff
+    // Include constructable versions in public stuff
     methods.Database = DatabaseTemplate;
     methods.Table = TableTemplate;
     methods.Column = ColumnTemplate;
