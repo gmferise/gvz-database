@@ -43,6 +43,11 @@ features of the API allowing a cleaner application to be built using them.
     * [GVZ.Database](#gvzdatabase)
     * [GVZ.Table](#gvztable)
     * [GVZ.Column](#gvzcolumn)
+    
+* [Reading and Writing Data](#reading-and-writing-data)
+    * [Table.push](#tablepush)
+    * [Table.select](#tableselect)
+    * [Table.update](#tableupdate)
 
 * [Reference Objects](#reference-objects)
     * [Database](#database-reference)
@@ -50,6 +55,15 @@ features of the API allowing a cleaner application to be built using them.
     * [Column](#column-reference)
     * [Datatype](#datatype-reference)
     * [Selection](#selection-reference)
+    
+* [Utility Functions)(#utility-functions)
+    * isoDateTime(#isodatetime)
+    * isoDate(#isodate)
+    * isoTime(#isotime)
+    * isoDuration(#isoduration)
+    * indexToLetter(#indextoletter)
+    * padZeroes(#padzeroes)
+    * findDuplicates(#findduplicates)
 
 # Getting Started
 
@@ -206,12 +220,12 @@ Upon changes in auth status, the callback will recieve the new auth status as in
 **Inputs:**
 | Parameter | Type      | Optional | Description |
 | :-------- | :-------- | :------- | :---------- |
-| callback  | function  | No       | The function to execute upon change in auth status. |
+| callback  | function  | No       | The function to execute upon change in auth status |
 
 The input signature of the callback function should be as follows:
-| Parameter | Type     | Optional |
-| :-------- | :------- | :------- |
-| newStatus | boolean  | No       |
+| Parameter | Type     | Optional | Description |
+| :-------- | :------- | :------- | :---------- |
+| newStatus | boolean  | No       | Recieves the new state of the auth status |
 
 **Outputs:**
 Nothing
@@ -422,7 +436,48 @@ A Promise
 | Resolved | New [Database Reference Object](#database-reference) | 
 | Rejected | Error message |
 
+# Reading and Writing Data
 
+## Table.push
+Pushes rows of data to the end of the table
+
+**Inputs:**
+| Parameter | Type               | Optional | Description |
+| :-------- | :----------------- | :------- | :---------- |
+| arr       | array/nested array | No       | The data to push |
+
+*Format details:*
+
+Your data should be input into the function in one of the following ways.
+The code snippets also show potential ways to input your data for each datatype.
+
+A single array represents a single row of data in which each array item is a column of data
+
+```javascript
+// example datatypes: string, number, unumber, boolean, date, time, datetime, duration
+myTable.push(['data', -123.4, 123.4, false, new Date('7/4/2020'), new Date(0,0,0,23,59,59,999), new Date(), new Date(1234)]);
+```
+
+Multiple arrays representing multiple rows can be pushed simultaneously by putting them in a single array
+
+```javascript
+// example datatypes: string, number, unumber, boolean, date, time, datetime, duration
+myTable.push([
+    ['data1', 567.8, 567, 'false', new Date('12/25/2020'), new Date(104399999), new Date(), new Date(23*60*60*1000+59*60*1000+59*1000+999)],
+    ['data2', -567, 567.8, true, new Date(18000000), new Date(0,0,0,23,59,59,999), new Date(1593877221569), new Date(1970,0,0,19+23,59,59,999)]
+);
+```
+
+**Outputs:**
+A Promise
+| Result   | Returns       |
+| :------- | :------------ |
+| Resolved | Nothing       | 
+| Rejected | Error message |
+
+## Table.select
+
+## Table.update
 <!--
 # Examples
 
