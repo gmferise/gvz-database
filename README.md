@@ -4,13 +4,21 @@ easier to use for managing a spreadsheet like a database. The APIs rely on makin
 requests which is flexible but messy for such a purpose. This library compresses down
 features of the API allowing a cleaner application to be built using them.
 
+If reading the raw documentation is intimidating, start with the walkthrough.
+You can also take a look at `example.html` and `example-scripts.js` in the repository for a working example.
+
 # Documentation Contents
 
-* [Getting Started](#getting-started)
+* [Walkthrough](#walkthrough)
     * [Installation](#installation)
     * [Google Developer Console Config](#google-developer-console-config) 
     * [Initializing the Library](#initializing-the-library)
     * [Promises](#promises)
+    * [Logging and Errors](#logging-and-errors)
+    * [Authenticating](#authenticating)
+    * [Listening for Auth Changes](#listening-for-auth-changes)
+    * [Loading Databases](#loading-databases)
+    * [Creating Databases](#creating-databases)
 
 * [Basic Methods](#basic-methods)
     * [GVZ.log](#gvzlog)
@@ -65,7 +73,7 @@ features of the API allowing a cleaner application to be built using them.
     * [padZeroes](#padzeroes)
     * [findDuplicates](#findduplicates)
 
-# Getting Started
+# Walkthrough
 
 ## Installation
 [Download the latest version](https://github.com/gmferise/gvz-database/releases) of `gvz-database.js` and put it in your project folder.
@@ -109,7 +117,7 @@ function loadGVZ(){
 }
 ```
 
-## The Promise Object
+## Promises
 Many of the methods in this library will return a JavaScript Promise object.
 
 These articles on 
@@ -118,36 +126,158 @@ and
 [promise functionality](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise)
 do a great job of explaining how they work.
 
+## Logging and Errors
+The library comes with its own logging features.
+It will throw errors and make debug statements (if enabled) during async actions
+
+**Related Methods:**
+* [GVZ.log](#gvzlog)
+* [GVZ.setLogging](#gvzsetlogging)
+* [GVZ.toggleLogging](#gvztogglelogging)
+* [GVZ.err](#gvzerr)
+
+**Example:**
+```javascript
+GVZ.log("Logging is off by default, this will not print");
+
+GVZ.setLogging(true);
+GVZ.log("You can enable it though, now this prints!");
+
+GVZ.setLogging(false);
+GVZ.log("Of course, you can turn it off too. This doesn't print.");
+
+GVZ.toggleLogging();
+GVZ.log("There's also a toggle function if you need it. Printing again!");
+
+GVZ.err("Huston, we have a problem");
+
+GVZ.log("This will not print, the program halts first.");
+```
+
+## Authenticating
+The library requires very little of you to allow the user to authenticate with their Google account.
+
+**Related Methods:**
+* [GVZ.signIn](#gvzsignin)
+* [GVZ.signOut](#gvzsignout)
+* [GVZ.toggleAuth](#gvztoggleauth)
+* [GVZ.isAuth](#gvzisauth)
+
+`GVZ.toggleAuth()` is most useful as a button function and will sign in or sign out the user appropriately.
+
+`GVZ.signIn()` and `GVZ.signOut()` can be used to do this process manually if a toggle does not suit your needs.
+
+`GVZ.isAuth()` returns a boolean representing whether the user is signed in or not.
+
+These methods are primarily useful for asking the user to sign in, or forcing them to sign out.
+When updating the interface based on the user's auth status, it is recommended you use the auth status listener feature.
+
+## Listening for Auth Changes
+It is recommended you make a listener function that will update your interface whenever the user's auth status changes.
+The library makes this easy with two functions.
+
+`GVZ.setAuthListener(yourFunction)` will tell the library to call yourFunction every time the user's auth status changes. Your listener function should have one boolean parameter to receive the user's new auth status.
+
+`GVZ.clearAuthListener()` will clear whatever listener function the library is currently sending events to.
+
+**Related Methods:**
+* [GVZ.setAuthListener](#gvzsetauthlistener)
+* [GVZ.clearAuthListener](#gvzclearauthlistener)
+
+**Example:**
+```javascript
+// Update UI when user's auth changes
+function authChanged(newStatus){
+    GVZ.log("The user's auth status is now "+newStatus);
+    // TODO: Update some UI stuff
+}
+GVZ.setAuthListener(authChanged);
+```
+
+## Loading Databases
+Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
+At any point you can get the last updated copy of this array using `GVZ.getDatabases()` or just call `GVZ.reloadDatabases()` again if you want to ensure the array returned is up-to-date.
+You can also get the information of a singular database using `getDatabase(id)` and you can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
+
+To limit the databases the library attempts to load, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`. Of course, there is also a `GVZ.getFlair()` if you need it.
+When a flair is set, any databases created with the library will be given the name `[Flair] My Database` and `GVZ.reloadDatabases()` will only load databases with `[Flair]` at the start of their name (case sensitive, strict match).
+It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
+
+**Related Methods:**
+* [GVZ.setFlair](#gvzsetflair)
+* [GVZ.getFlair](#gvzgetflair)
+* [GVZ.clearFlar](#gvzclearflair)
+* [GVZ.reloadDatabases](#gvzreloaddatabases)
+* [GVZ.reloadDatabase](#gvzreloaddatabase)
+* [GVZ.getDatabases](#gvzgetdatabases)
+* [GVZ.getDatabase](#gvzgetdatabase)
+
+**Example:**
+```javascript
+// Both pairs of functions will print the same thing.
+// The reload functions are asynchronous and return the up-to-date versions in a promise
+// The get functions are instant and return the last known values
+
+GVZ.reloadDatabases().then(function(databases){ console.log(databases); });
+console.log(GVZ.getDatabases());
+
+GVZ.reloadDatabase(id).then(function(database){ console.log(database); });
+console.log(GVZ.getDatabase(id));
+```
+
+## Creating Databases
+The classes `GVZ.Database`, `GVZ.Table`, and `GVZ.Column` make building databases structures easy.
+
+Passing in a database object into `GVZ.createDatabase(obj)` returns a promise with the resulting database object.
+
+If a flair is set, it will automatically be added into the name of the database, *do not* add it yourself.
+
+Your database *must*:
+* Have a name property defined that is not an empty string
+* Have at least one table in the tables property
+* Have tables with unique name properties (required by Sheets)
+* Have tables that:
+    * Have a name property defined that is not an empty string
+    * Have at least one column in the columns property
+    * Have columns that:
+        * Have a header property defined that is not an empty string
+        * Have a datatype defined
+
+**Related Methods & Classes:**
+* [GVZ.createDatabase](#gvzcreatedatabase)
+* [GVZ.Database](#gvzdatabase)
+* [GVZ.Table](#gvztable)
+* [GVZ.Column](#gvzcolumn)
+
+**Examples:**
+```javascript
+// standard verbose way
+let per3 = new GVZ.Database('Period 3');
+let tbl = new GVZ.Table('Attendance');
+tbl.columns.push(new GVZ.Column('student id','unumber',0));
+tbl.columns.push(new GVZ.Column('timestamp','datetime'));
+tbl.columns.push(new GVZ.Column('tardy','boolean'));
+db.tables.push(tbl);
+
+// shorter way
+let per4 = new GVZ.Database('Period 4',[
+    new GVZ.Table('Attendance',[
+        new GVZ.Column('student id','unumber',0)),
+        new GVZ.Column('timestamp','datetime')),
+        new GVZ.Column('tardy','boolean'))
+    ])//,
+    // could add more tables here
+]);
+
+// create database call is async
+GVZ.createDatabase(per3).then(function(newDatabase){
+    GVZ.createDatabase(per4).then(function(newDatabase){
+        // refresh UI here
+    });
+});
+```
+
 # Basic Methods
-
-<!--
-Description
-
-**Inputs:**
-Nothing
-| Parameter | Type    | Optional | Description |
-| :-------- | :------ | :------- | :---------- |
-| string    | string  | No       | The message to log to the console |
-
-**Outputs:**
-Nothing
-A Value
-| Type     | Description |
-| :------- | :---------- |
-| boolean  | The current authentication state |
-A Promise
-| Result   | Returns       |
-| :------- | :------------ |
-| Resolved | Nothing       | 
-| Rejected | Error message |
-An Object
-| Property  | Type   | Description |
-| :-------- | :----- | :---------- |
-| firstName | string | The user's first (given) name |
-| lastName  | string | The user's last (family) name |
-| email     | string | The user's email address |
-| picture   | string | The URL for the user's profile picture |
--->
     
 ## GVZ.log
 Sends a message to the console if logging is enabled
@@ -436,6 +566,37 @@ A Promise
 | Resolved | New [Database Reference Object](#database-reference) | 
 | Rejected | Error message |
 
+# Constructable Objects
+These objects are meant for you to create. Use them to interact with the library
+
+## GVZ.Database
+
+**Constructor:**
+| Parameter   | Type    | Optional | Description |
+| :---------- | :------ | :------- | :---------- |
+| name        | string  | No       | The name of the database. Do not include the flair |
+| tables      | array   | Yes      | An array of [Table Objects](#gvztables) |
+
+If you leave `tables` blank upon construction, make sure to set or append to the `tables` property later.
+
+## GVZ.Table
+
+**Constructor:**
+| Parameter   | Type    | Optional | Description |
+| :---------- | :------ | :------- | :---------- |
+| name        | string  | No       | The name of the table |
+| columns     | array   | Yes      | An array of [Column Objects](#gvzcolumns) |
+
+If you leave `columns` blank upon construction, make sure to set or append to the `columns` property later.
+
+## GVZ.Column
+
+**Constructor:**
+| Parameter   | Type    | Optional | Description |
+| :---------- | :------ | :------- | :---------- |
+| header      | string  | No       | The header for this column in the table |
+| type        | string  | No       | The [datatype](#datatypes) this column should use |
+
 # Reading and Writing Data
 
 ## Table.push
@@ -497,139 +658,4 @@ A Promise
 | Rejected | Error message |
 
 ## Table.update
-<!--
-# Examples
-
-### Logging and Errors
-The library comes with its own logging features.
-It will throw errors and make debug statements (if enabled) during async actions
-
-**Related Methods:**
-* [GVZ.log](#gvzlog)
-* [GVZ.setLogging](#gvzsetlogging)
-* [GVZ.toggleLogging](#gvztogglelogging)
-* [GVZ.err](#gvzerr)
-
-**Example:**
-```javascript
-GVZ.log("Logging is off by default, this will not print");
-
-GVZ.setLogging(true);
-GVZ.log("You can enable it though, now this prints!");
-
-GVZ.setLogging(false);
-GVZ.log("Of course, you can turn it off too. This doesn't print.");
-
-GVZ.toggleLogging();
-GVZ.log("There's also a toggle function if you need it. Printing again!");
-
-GVZ.err("Huston, we have a problem");
-
-GVZ.log("This will not print, the program halts first.");
-```
-
-### Authenticating
-The library requires very little of you to allow the user to authenticate with their Google account.
-
-**Related Methods:**
-* [GVZ.signIn](#gvzsignin)
-* [GVZ.signOut](#gvzsignout)
-* [GVZ.toggleAuth](#gvztoggleauth)
-* [GVZ.isAuth](#gvzisauth)
-
-`GVZ.toggleAuth()` is most useful as a button function and will sign in or sign out the user appropriately.
-
-`GVZ.signIn()` and `GVZ.signOut()` can be used to do this process manually if a toggle does not suit your needs.
-
-`GVZ.isAuth()` returns a boolean representing whether the user is signed in or not.
-
-These methods are primarily useful for asking the user to sign in, or forcing them to sign out.
-When updating the interface based on the user's auth status, it is recommended you use the auth status listener feature.
-
-### Listening for Auth Changes
-It is recommended you make a listener function that will update your interface whenever the user's auth status changes.
-The library makes this easy with two functions.
-
-`GVZ.setAuthListener(yourFunction)` will tell the library to call yourFunction every time the user's auth status changes. Your listener function should have one boolean parameter to receive the user's new auth status.
-
-`GVZ.clearAuthListener()` will clear whatever listener function the library is currently sending events to.
-
-
-**Example:**
-```javascript
-// Update UI when user's auth changes
-function authChanged(newStatus){
-    GVZ.log("The user's auth status is now "+newStatus);
-    // TODO: Update some UI stuff
-}
-GVZ.setAuthListener(authChanged);
-```
-
-### Loading Databases
-Once the user has signed in you can search their Google Drive for databases to choose from using `GVZ.reloadDatabases()`.
-At any point you can get the last updated copy of this array using `GVZ.getDatabases()` or just call `GVZ.reloadDatabases()` again if you want to ensure the array returned is up-to-date.
-You can also get the information of a singular database using `getDatabase(id)` and you can call `GVZ.reloadDatabase(id)` to ensure the info of a singlular database is up-to-date.
-
-To limit the databases the library attempts to load, you can set a database flair using `GVZ.setFlair(string)` or clear the flair using `GVZ.clearFlair()` or `GVZ.setFlair("")`. Of course, there is also a `GVZ.getFlair()` if you need it.
-When a flair is set, any databases created with the library will be given the name `[Flair] My Database` and `GVZ.reloadDatabases()` will only load databases with `[Flair]` at the start of their name (case sensitive, strict match).
-It should be noted that the brackets *are* written in the name, and you do not need to include them when setting the flair.
-
-**Example:**
-```javascript
-// Both pairs of functions will print the same thing.
-// The reload functions are asynchronous and return the up-to-date versions in a promise
-// The get functions are instant and return the last known values
-
-GVZ.reloadDatabases().then(function(databases){ console.log(databases); });
-console.log(GVZ.getDatabases());
-
-GVZ.reloadDatabase(id).then(function(database){ console.log(database); });
-console.log(GVZ.getDatabase(id));
-```
-
-### Creating Databases
-The classes `GVZ.Database`, `GVZ.Table`, and `GVZ.Column` make building databases structures easy.
-
-Passing in a database object into `GVZ.createDatabase(obj)` returns a promise with the resulting database object.
-
-If a flair is set, it will automatically be added into the name of the database, *do not* add it yourself.
-
-Your database *must*:
-* Have a name property defined that is not an empty string
-* Have at least one table in the tables property
-* Have tables with unique name properties (required by Sheets)
-* Have tables that:
-    * Have a name property defined that is not an empty string
-    * Have at least one column in the columns property
-    * Have columns that:
-        * Have a header property defined that is not an empty string
-        * Have a datatype defined
-
-**Examples:**
-```javascript
-// standard verbose way
-let per3 = new GVZ.Database('Period 3');
-let tbl = new GVZ.Table('Attendance');
-tbl.columns.push(new GVZ.Column('student id','unumber',0));
-tbl.columns.push(new GVZ.Column('timestamp','datetime'));
-tbl.columns.push(new GVZ.Column('tardy','boolean'));
-db.tables.push(tbl);
-
-// shorter way
-let per4 = new GVZ.Database('Period 4',[
-    new GVZ.Table('Attendance',[
-        new GVZ.Column('student id','unumber',0)),
-        new GVZ.Column('timestamp','datetime')),
-        new GVZ.Column('tardy','boolean'))
-    ])//,
-    // could add more tables here
-]);
-
-// create database call is async
-GVZ.createDatabase(per3).then(function(newDatabase){
-    GVZ.createDatabase(per4).then(function(newDatabase){
-        // refresh UI here
-    });
-});
-```
--->
+This method is a planned feature.

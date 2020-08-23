@@ -596,7 +596,7 @@ var GVZ = (function() {
     
     class DatabaseTemplate {
         constructor(name, tables){
-            this.name = name;
+            this.name = name.toString();
             this.tables = (tables === undefined) ? [] : tables;
         }
         
@@ -620,7 +620,7 @@ var GVZ = (function() {
     
     class TableTemplate { 
         constructor(name, columns){
-            this.name = name;
+            this.name = name.toString();
             this.columns = (columns === undefined) ? [] : columns;
         }
         
@@ -637,7 +637,7 @@ var GVZ = (function() {
     
     class ColumnTemplate {
         constructor(header, type, decimals){
-            this.header = header;
+            this.header = header.toString();
             this.datatype = new DatatypeTemplate(type, decimals);
         }
         
@@ -784,7 +784,6 @@ var GVZ = (function() {
                 });
             });
         }
-        
     }
     
     class Column {
