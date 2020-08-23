@@ -62,7 +62,6 @@ You can also take a look at `example.html` and `example-scripts.js` in the repos
     * [Table](#table-reference)
     * [Column](#column-reference)
     * [Datatype](#datatype-reference)
-    * [Selection](#selection-reference)
     
 * [Utility Functions](#utility-functions)
     * [isoDateTime](#isodatetime)
@@ -595,7 +594,7 @@ If you leave `columns` blank upon construction, make sure to set or append to th
 | Parameter   | Type    | Optional | Description |
 | :---------- | :------ | :------- | :---------- |
 | header      | string  | No       | The header for this column in the table |
-| type        | string  | No       | The [datatype](#datatypes) this column should use |
+| type        | string  | No       | The [datatype](#datatype-reference) this column should use |
 
 # Reading and Writing Data
 
@@ -646,7 +645,7 @@ Selects rows of data based on the string query
 
 If the paremeter is left blank, it will be treated as the same as a `SELECT *` query.
 
-See the [Google Documentation] for using the query language.
+See the [Google Documentation](https://developers.google.com/chart/interactive/docs/querylanguage) for using the query language.
 You do not have to type `SELECT ` before your query as it's added for you.
 The option `no_format` is also applied to the query.
 
