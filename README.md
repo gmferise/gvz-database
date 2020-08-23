@@ -484,7 +484,7 @@ Nothing
 **Indirect Inputs:**
 | Parameter | Getter | Setter |
 | :-------- | :----- | :----- |
-| flair     | [GVZ.getFlair](#gvz-getflair) | [GVZ.setFlair](#gvz-setflair) |
+| flair     | [GVZ.getFlair](#gvzgetflair) | [GVZ.setFlair](#gvzsetflair) |
 
 **Outputs:**
 A Promise
@@ -556,7 +556,7 @@ Creates a spreadsheet with the current flair and loads it as a database given a 
 **Indirect Inputs:**
 | Parameter | Getter | Setter |
 | :-------- | :----- | :----- |
-| flair     | [GVZ.getFlair](#gvz-getflair) | [GVZ.setFlair](#gvz-setflair) |
+| flair     | [GVZ.getFlair](#gvzgetflair) | [GVZ.setFlair](#gvzsetflair) |
 
 **Outputs:**
 A Promise
