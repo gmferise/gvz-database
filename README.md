@@ -1,3 +1,7 @@
+# Preface
+This repo is not up to date. I wrote this in high school without much knowledge of ES6 for a self-driven project-based class.
+The library itself is quite niche: it is essentially only useful for making a vanilla interface for a google sheet.
+
 # About
 This is a JavaScript library that makes using Google's Sheets and Drive JavaScript APIs
 easier to use for managing a spreadsheet like a database. The APIs rely on making JSON
